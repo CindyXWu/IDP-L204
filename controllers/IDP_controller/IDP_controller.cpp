@@ -269,7 +269,7 @@ compass->enable(TIME_STEP);
   if (i == 0){
     const double *north = compass->getValues();
     //initial_position = gps->getValues();
-    initial_position_cache[0] = gps->getValues()[0];
+    initial_position_cache[0] = gps->getValues()[0]; //this works plz dont mess with it
     initial_position_cache[1] = gps->getValues()[1];
     initial_position_cache[2] = gps->getValues()[2];
     //std::cout <<  north[0] << ", "<< north[1] << ", "<< north[2] << std::endl;

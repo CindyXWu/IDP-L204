@@ -19,10 +19,9 @@ Robot {
       name "compass"
     }
     SharpGP2Y0A02YK0F {
-      translation 0 0 0.12
+      translation 0 -0.02 0.12
       rotation -0.5773502691896258 0.5773502691896258 -0.5773502691896258 -2.094395307179586
-      name "ir"
-    }
+      name "ir"    }
     DEF Arm_R HingeJoint {	
       jointParameters HingeJointParameters {	
         axis 0 1 0	

@@ -214,6 +214,8 @@ void doScan(double theta, double initial_bearing, bool *fin) {
 }
 
 void rotate_until_bearing(double target_bearing, double initial_bearing) {
+    
+    std::cout << target_bearing << "," << initial_bearing << std::endl;
 
     double angle_rotated = 0.0;
     // set the target position, velocity of the motors
@@ -226,18 +228,24 @@ void rotate_until_bearing(double target_bearing, double initial_bearing) {
       
       while (robot->step(TIME_STEP) != -1){
         double bearing = get_bearing_in_degrees();
-        //std::cout << bearing << std::endl;
+   
+        std::cout << bearing << std::endl;
         
-        if (bearing > target_bearing) {
+        if (bearing >= target_bearing) {
+        
+          std::cout << "Breaking" << std::endl;
+          
           leftMotor->setVelocity(0.0 * MAX_SPEED);
+          
           rightMotor->setVelocity(0.0 * MAX_SPEED);
+          
           break;
           
         }
       }
     }
     
-    if (target_bearing < initial_bearing) {
+    else{
     
       leftMotor->setVelocity(-0.1 * MAX_SPEED);
       rightMotor->setVelocity(0.1 * MAX_SPEED);
@@ -246,7 +254,7 @@ void rotate_until_bearing(double target_bearing, double initial_bearing) {
         double bearing = get_bearing_in_degrees();
         //std::cout << bearing << std::endl;
         
-        if (bearing < target_bearing) {
+        if (bearing <= target_bearing) {
           leftMotor->setVelocity(0.0 * MAX_SPEED);
           rightMotor->setVelocity(0.0 * MAX_SPEED);
           break;
@@ -280,6 +288,7 @@ std::vector<double> getBlockBearings(){
       
       //Alpha is a shortcode for the distance value on the jth row, 2nd column of sensorValueScam
       double alpha;
+      int j=0;
       //Conditional logic to extract bearings and then convert to GPS location
       for(unsigned int i = 1; i<sensorValueScan.size();i++){
         alpha = sensorValueScan[i][2];
@@ -289,7 +298,8 @@ std::vector<double> getBlockBearings(){
         calculated above
         */
         if( (sensorValueScan[i-1][2]-alpha) > 0.05){
-          blockBearings[i] = sensorValueScan[i][3];
+          blockBearings[j] = sensorValueScan[i][3];
+          j++;
         }
       }
       
@@ -433,9 +443,9 @@ int main(int argc, char **argv) {
           fin1=true;
        }
       
-      if(robot->step(TIME_STEP) == -1){
+      /*if(robot->step(TIME_STEP) == -1){
         break;
-       }
+       }*/
       
       /*if(fin1==true && fin2==false){
          std::cout << "Debug if 2" << std::endl;
@@ -455,9 +465,12 @@ int main(int argc, char **argv) {
       
       //Collecting one block
       if(fin1==true && fin2==false){
-      
+        std::cout << "If statement runs" << std::endl;
         std::vector<double> bearings = getBlockBearings();
+     
         rotate_until_bearing(bearings[0],get_bearing_in_degrees());
+        
+        std::cout << "finished rotate" << std:: endl;
         std::vector<std::vector<double>> GPSOfBlocks = getBlockGPS(&fin2);
         std::cout << "Crash not due to GPS" << std::endl;
         
@@ -486,7 +499,6 @@ int main(int argc, char **argv) {
       if(i==2){
         break;
       }
-       
 
 /*=========================================
 CODE SNIPPET TO OUTPUT SENSOR VALUE 2D ARRAY

@@ -53,12 +53,6 @@ void move_backwards() {
    rightMotor->setVelocity(-0.5 * MAX_SPEED);
 }
 
-void move_position(double x){
-   // set the target position of the motors
-   leftMotor->setPosition(x);
-   rightMotor->setPosition(x);
-}
-
 void rotate_CW() {
    // set the target position of the motors
    leftMotor->setPosition(INFINITY);
@@ -86,9 +80,11 @@ void open_arms() {
 }
 
 void close_arms() {
+   Motor *leftArmMotor = robot->getMotor("Arm_L");
+   Motor *rightArmMotor = robot->getMotor("Arm_R");
    // set the target position of the motors
-   leftMotor->setPosition(0.0);
-   rightMotor->setPosition(0.0);
+   leftArmMotor->setPosition(0.0);
+   rightArmMotor->setPosition(0.0);
 }
 
 //Function to get sensor values for one time step, in distance units
@@ -267,11 +263,7 @@ BLOCK DETECTION
 //Takes uncleaned 2d vector and filters for blocks, returning array of their bearings
 std::vector<double> getBlockBearings(){
       
-      std::cout << "function call successful" << std::endl;
-      
-      std::vector<double> blockBearings;
-      std::vector<double> blockDistances;
-      std::vector<std::vector<double>> blockGPS;
+      std::vector<double> blockBearings(8);
       
       //Calculating average returned IR sensor value
       int lookUpTableSize = ds[2]->getLookupTableSize();
@@ -283,9 +275,6 @@ std::vector<double> getBlockBearings(){
           numCounter++;
         }
       }
-      
-      std::cout << numCounter << std::endl;
-      std::cout << "numCounter print you lil bitch" << std::endl;
       
       double avgDistance = sumDistance/numCounter;
       
@@ -299,19 +288,50 @@ std::vector<double> getBlockBearings(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (alpha-sensorValueScan[i-1][2]) > 0.05 
-        //|| (avgDistance-alpha) > 0.3
-        ){
-          blockBearings.push_back(sensorValueScan[i][3]);
+        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
+          blockBearings[i] = sensorValueScan[i][3];
         }
       }
       
       return blockBearings;
 }
-//Clean sensorValueScan to get block GPS coordinates. A copy of getBlockBearings with GPS added
-std::vector<std::vector<double>> getBlockGPS(){
+
+std::vector<double> getBlockDistances(){
       
-      std::cout << "function call successful" << std::endl;
+      std::vector<double> blockDistances;
+      
+      //Calculating average returned IR sensor value
+      int lookUpTableSize = ds[2]->getLookupTableSize();
+      int numCounter = 0;
+      double sumDistance = 0;
+      for (unsigned int i =0; i<sensorValueScan.size();i++){
+        sumDistance += sensorValueScan[i][2];
+        if(sensorValueScan[i][2]!=0){
+          numCounter++;
+        }
+      }
+      
+      double avgDistance = sumDistance/numCounter;
+      
+      //Alpha is a shortcode for the distance value on the jth row, 2nd column of sensorValueScam
+      double alpha;
+      //Conditional logic to extract bearings and then convert to GPS location
+      for(unsigned int i = 1; i<sensorValueScan.size();i++){
+        alpha = sensorValueScan[i][2];
+        /*Conditions for blocks to be picked out:
+        1. Large jump between previous value
+        2. Large difference between distance value recorded and average distance value
+        calculated above
+        */
+        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
+          blockDistances[i]=alpha;
+        }
+      }
+      
+      return blockDistances;
+}
+//Clean sensorValueScan to get block GPS coordinates. A copy of getBlockBearings with GPS added
+std::vector<std::vector<double>> getBlockGPS(bool *fin){
       
       std::vector<double> blockBearings(8);
       std::vector<double> blockDistances(8);
@@ -328,7 +348,6 @@ std::vector<std::vector<double>> getBlockGPS(){
       }
       
       std::cout << numCounter << std::endl;
-      std::cout << "numCounter print you lil bitch" << std::endl;
       
       double avgDistance = sumDistance/numCounter;
       std::vector<std::vector<double>> blockGPS(8, std::vector<double>(3));
@@ -344,7 +363,7 @@ std::vector<std::vector<double>> getBlockGPS(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (alpha-sensorValueScan[i-1][2]) > 0.05 || (avgDistance-alpha) > 0.3){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
           blockBearings[j]=sensorValueScan[i][3];
           blockDistances[j]=alpha;
           j++;
@@ -359,6 +378,9 @@ std::vector<std::vector<double>> getBlockGPS(){
         blockGPS[i][1] = gps->getValues()[1];
         blockGPS[i][2] = gps->getValues()[2]+(blockDistances[i]+0.12)*sin(blockBearings[i]*M_PI/180);
       }
+      
+      *fin = true;
+      std::cout << "GPS function calls fine" << std::endl;
       return blockGPS;
 }
 
@@ -408,15 +430,16 @@ int main(int argc, char **argv) {
           double currentBearing = get_bearing_in_degrees();
           doScan(355, currentBearing, &fin1);
           std::cout << "Crashing is not because of DoScan" << std::endl;
+          fin1=true;
        }
       
       
-      /*if(fin2==false){
+      if(fin2==false){
          std::vector<double> blockBearings = getBlockBearings();
          for(auto& i:blockBearings){
              std::cout << i << std::endl;
             }
-         std::vector<std::vector<double>> GPSOfBlocks = getBlockGPS();
+         std::vector<std::vector<double>> GPSOfBlocks = getBlockGPS(&fin2);
          for(auto& row:GPSOfBlocks){
            for(auto& i:row){
               std::cout << i << std::endl;
@@ -424,42 +447,42 @@ int main(int argc, char **argv) {
            std::cout << "NEXT" << std::endl;
          }
          fin2 = true;
-      }*/
-      
-      if(robot->step(TIME_STEP) != -1){
-        break;
       }
       
       //Collecting one block
-      if(fin1==true && fin2==false){
+      /*if(fin1==true && fin2==false){
       
         std::vector<double> bearings = getBlockBearings();
         rotate_until_bearing(bearings[0],get_bearing_in_degrees());
-        open_arms();
-        std::vector<std::vector<double>> GPSOfBlocks = getBlockGPS();
+        std::vector<std::vector<double>> GPSOfBlocks = getBlockGPS(&fin2);
+        std::cout << "Crash not due to GPS" << std::endl;
         
-        do{
-          double delta_x = fabs(GPSOfBlocks[0][0]-gps->getValues()[0]);
-          double delta_z = fabs(GPSOfBlocks[0][2]-gps->getValues()[2]);
-          double distance = sqrt(delta_x*delta_x + delta_z*delta_z);
+        open_arms();
+        move_forwards();
           
-          leftMotor->setPosition(INFINITY);
-          rightMotor->setPosition(INFINITY);
-          leftMotor->setVelocity(0.5 * MAX_SPEED);
-          rightMotor->setVelocity(0.5 * MAX_SPEED);
-          
-          if(distance < 0.15){
-            leftMotor->setVelocity(0);
-            rightMotor->setVelocity(0);
+        while(robot->step(TIME_STEP) != -1){
+        
+          const double *positionWhileMoving = gps->getValues();
+          double distance = std::sqrt(std::pow(GPSOfBlocks[0][0]-positionWhileMoving[0],2)
+          +std::pow(GPSOfBlocks[0][2]-positionWhileMoving[0],2));
+         
+          if(distance < 0.3){
+            leftMotor->setVelocity(0.0);
+            rightMotor->setVelocity(0.0);
             break;
           }
-        }while(robot->step(TIME_STEP) != -1);
         
-        //bool blockColour = readColour();
-        //Some code here to store colour
-        close_arms();
-        fin2 = 1;
+        }
+
+        fin2 = true;
        }
+       
+      i++;
+      
+      if(i==2){
+        break;
+      }
+       
 
 /*=========================================
 CODE SNIPPET TO OUTPUT SENSOR VALUE 2D ARRAY
@@ -491,12 +514,6 @@ CODE SNIPPET TO OUTPUT AVERAGE DISTANCE
         std::cout << "DISTANCE AVERAGE:" << avgDistance;
       }*/
       
-      i++;
-      
-      if(i==2){
-        break;
-       }
-       
 /*=============================================================
 CODE SNIPPET FOR OUTPUTTING LOOKUP TABLE VALUES
 ===============================================================

@@ -288,7 +288,7 @@ std::vector<double> getBlockBearings(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.05){
           blockBearings[i] = sensorValueScan[i][3];
         }
       }
@@ -323,7 +323,7 @@ std::vector<double> getBlockDistances(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.05){
           blockDistances[i]=alpha;
         }
       }
@@ -363,7 +363,7 @@ std::vector<std::vector<double>> getBlockGPS(bool *fin){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.05){
           blockBearings[j]=sensorValueScan[i][3];
           blockDistances[j]=alpha;
           j++;

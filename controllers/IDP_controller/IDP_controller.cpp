@@ -288,7 +288,7 @@ std::vector<double> getBlockBearings(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
           blockBearings[i] = sensorValueScan[i][3];
         }
       }
@@ -298,7 +298,7 @@ std::vector<double> getBlockBearings(){
 
 std::vector<double> getBlockDistances(){
       
-      std::vector<double> blockDistances;
+      std::vector<double> blockDistances(8);
       
       //Calculating average returned IR sensor value
       int lookUpTableSize = ds[2]->getLookupTableSize();
@@ -323,7 +323,7 @@ std::vector<double> getBlockDistances(){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
           blockDistances[i]=alpha;
         }
       }
@@ -363,7 +363,7 @@ std::vector<std::vector<double>> getBlockGPS(bool *fin){
         2. Large difference between distance value recorded and average distance value
         calculated above
         */
-        if( (sensorValueScan[i-1][2]-alpha) > 0.1){
+        if( (sensorValueScan[i-1][2]-alpha) > 0.15){
           blockBearings[j]=sensorValueScan[i][3];
           blockDistances[j]=alpha;
           j++;
@@ -433,8 +433,12 @@ int main(int argc, char **argv) {
           fin1=true;
        }
       
+      if(robot->step(TIME_STEP) == -1){
+        break;
+       }
       
-      if(fin2==false){
+      /*if(fin1==true && fin2==false){
+         std::cout << "Debug if 2" << std::endl;
          std::vector<double> blockBearings = getBlockBearings();
          for(auto& i:blockBearings){
              std::cout << i << std::endl;
@@ -447,10 +451,10 @@ int main(int argc, char **argv) {
            std::cout << "NEXT" << std::endl;
          }
          fin2 = true;
-      }
+      }*/
       
       //Collecting one block
-      /*if(fin1==true && fin2==false){
+      if(fin1==true && fin2==false){
       
         std::vector<double> bearings = getBlockBearings();
         rotate_until_bearing(bearings[0],get_bearing_in_degrees());

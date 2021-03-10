@@ -476,18 +476,27 @@ int main(int argc, char **argv) {
         
         open_arms();
         move_forwards();
-          
+        std::cout << "motor actuation works";
+        
+        if(robot->step(TIME_STEP) ==1){
+            break;
+           }
+        
         while(robot->step(TIME_STEP) != -1){
         
           const double *positionWhileMoving = gps->getValues();
           double distance = std::sqrt(std::pow(GPSOfBlocks[0][0]-positionWhileMoving[0],2)
           +std::pow(GPSOfBlocks[0][2]-positionWhileMoving[0],2));
-         
+          
           if(distance < 0.3){
             leftMotor->setVelocity(0.0);
             rightMotor->setVelocity(0.0);
             break;
           }
+          
+          if(robot->step(TIME_STEP) ==1){
+            break;
+           }
         
         }
 

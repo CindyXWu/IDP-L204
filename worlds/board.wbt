@@ -1,6 +1,7 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
   basicTimeStep 16
+  FPS 15
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
@@ -108,11 +109,11 @@ target {
   translation 0.47 0.03 0.51
 }
 target {
-  translation 0.78 0.03 1.05
+  translation -0.475433 0.03 -0.0860822
   name "target(4)"
 }
 target {
-  translation 0.6 0.03 0.26
+  translation 0.536346 0.03 -0.768076
   name "target(2)"
 }
 target {
@@ -120,17 +121,17 @@ target {
   name "target(3)"
 }
 target {
-  translation 0.22 0.03 0.81
+  translation 0.929502 0.03 0.457514
   colour 0 1 0
   name "target(6)"
 }
 target {
-  translation 0.86 0.03 0.81
+  translation 0.508979 0.03 -0.322989
   colour 0 1 0
   name "target(7)"
 }
 target {
-  translation -0.6 0.03 0.88
+  translation -0.774396 0.03 -0.75856
   colour 0 1 0
   name "target(1)"
 }

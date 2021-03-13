@@ -496,7 +496,7 @@ int main(int argc, char** argv) {
     bool scanblocks = false;
     bool gotblock = false;
     bool moveblock = false;
-
+    bool blockgreen = false;
     //MAIN WHILE LOOP WHERE STUFF HAPPENS
     while (robot->step(TIME_STEP) != -1) {
 
@@ -560,10 +560,12 @@ int main(int argc, char** argv) {
                     if (colour == 1) {  
                         std::cout << "Red block found" << std::endl;
                         shuffleBack();
+                        continue;
                         break;
                     }
                     else {
                         close_arms();
+                        blockgreen=true;
                         std::cout << "Green block found" << std::endl;
                     }
                     moveblock=false;
@@ -580,11 +582,10 @@ int main(int argc, char** argv) {
             gotblock = true;
         }
         
-        if (moveblock == false) {
+        if (moveblock == false && blockgreen==true) {
 
            return_to_initial_position();
            open_arms();
-           std::cout << "Problem occurs after opening arms" << std::endl;
            shuffleBack();
            moveblock = true;
            gotblock = false;
@@ -593,8 +594,17 @@ int main(int argc, char** argv) {
         i++;
 
         if (i == 8) {
+            return_to_initial_position();
             break;
         }
+        
+        std::cout << "Finished end of block 1" << std::endl;
+
+    } //bracket to end while loop
+
+    delete robot;
+    return 0;
+}
 
         /*=========================================
         CODE SNIPPET TO OUTPUT SENSOR VALUE 2D ARRAY
@@ -640,9 +650,3 @@ int main(int argc, char** argv) {
            }
           i++;
         }*/
-
-    } //bracket to end while loop
-
-    delete robot;
-    return 0;
-}

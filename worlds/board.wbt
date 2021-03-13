@@ -1,6 +1,6 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
-  basicTimeStep 16
+  basicTimeStep 8
   FPS 15
   coordinateSystem "NUE"
   contactProperties [
@@ -19,8 +19,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.4094130805559237 -0.8373650934235821 -0.3622162748765225 4.851636966782975
-  position 3.054791882676749 2.7348388638481644 1.0775135743293134
+  orientation 0.9887697981814331 0.14412037838440803 0.039542416954241544 5.005552497015264
+  position -0.5136182427559493 3.660956168350065 1.3316560493586453
 }
 Background {
   skyColor [
@@ -141,4 +141,6 @@ target {
   name "target(5)"
 }
 robotmain {
+}
+robotmainred {
 }

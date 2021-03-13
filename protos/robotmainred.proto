@@ -1,5 +1,5 @@
-PROTO robotmain [	
-  field SFVec3f    translation  0 0.0546 -0.4	
+PROTO robotmainred [	
+  field SFVec3f    translation  0 0.0546 0.4	
   field SFRotation rotation     0 1 0 0	
   field SFFloat    bodyMass     3	
 ]	
@@ -283,7 +283,7 @@ Robot {
         }	
         DEF main Shape {	
           appearance PBRAppearance {	
-            baseColor 0.666667 1 0	
+            baseColor 1 0.294 0	
           }	
           geometry Box {	
             size 0.1 0.08 0.15	
@@ -352,7 +352,7 @@ Robot {
     }	
     LightSensor {	
       translation 0 0.029 0.145	
-      rotation 0.171086 0.171104 0.970285 -1.60087	
+      rotation 0 0 1 -1.57079632679	
       children [	
         Solid {	
           children [	
@@ -377,7 +377,7 @@ Robot {
         0.654 0.99 0.1	
 	1.225 1.86 0.1
       ]	
-      colorFilter 0 1 0	
+      colorFilter 1 0 0	
     }	
   ]	
   contactMaterial "robot"	
@@ -388,7 +388,7 @@ Robot {
     density -1	
     mass IS bodyMass	
   }	
-  rotationStep 0.349
-  controller "IDPPython"
+  rotationStep 0.1309
+  controller "IDPPythonRed"
 }	
 }

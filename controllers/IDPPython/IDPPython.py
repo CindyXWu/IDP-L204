@@ -1,5 +1,4 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter		
-import numpy as np		
 import math		
 import struct		
 TIME_STEP = 32		
@@ -31,7 +30,8 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)		
 gps.enable(TIME_STEP)		
 receiver.enable(TIME_STEP)
-nextTargetIdentified = False		
+nextTargetIdentified = False
+#---------------------------Communication Functions---------------------------------------------------------------
 def foundRed(gpsLocation):		
     message = struct.pack("chd","wrong_colour",gpsLocation)		
     emmitter.send(message)		
@@ -166,7 +166,7 @@ def getSensorValues():
 def getBearingInDegrees():		
     north = compass.getValues()								
     rad = math.atan2(north[2],north[0])		
-    bearing = 90 - rad/np.pi*180.0 		
+    bearing = 90 - rad/math.pi*180.0 		
     if bearing < 0:		
         bearing += 360		
     return bearing		
@@ -254,8 +254,8 @@ def getBlockData():
             blockBearings.append(sensorValueScan[i][3])		
             blockDistances.append(alpha)		
     for i in range(len(blockBearings)):		
-        xcoord = gps.getValues()[0] + (blockDistances[i] + 0.12) * math.cos(blockBearings[i] * np.pi / 180);		
-        zcoord = gps.getValues()[2] + (blockDistances[i] + 0.12) * math.sin(blockBearings[i] * np.pi / 180);		
+        xcoord = gps.getValues()[0] + (blockDistances[i] + 0.12) * math.cos(blockBearings[i] * math.pi / 180);		
+        zcoord = gps.getValues()[2] + (blockDistances[i] + 0.12) * math.sin(blockBearings[i] * math.pi / 180);		
         blockGPS.append([xcoord,zcoord])		
         		
     print(blockGPS, blockBearings,blockDistances)		
@@ -291,11 +291,11 @@ def returnToStart():
     current_position = gps.getValues()		
     target_bearing = 0.0		
     if current_position[2] < initial_position[2]:		
-        target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / np.pi)		
+        target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)		
         print("condition 1") 		
     		
     if current_position[2] > initial_position[2]:		
-        target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / np.pi)		
+        target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)		
         print("condition 2")		
     		
     if current_position[2] == initial_position[2] and current_position[0] > initial_position[0]:		
@@ -306,13 +306,13 @@ def returnToStart():
         print("condition 4")		
     if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:		
         print("condition 5")		
-    #distance_to_travel = np.sqrt((current_position[0] - initial_position[0])**2 + (current_position[2] - initial_position[2])**2)		
+    #distance_to_travel = math.sqrt((current_position[0] - initial_position[0])**2 + (current_position[2] - initial_position[2])**2)		
     #double wheel_angle_to_rotate = distance_to_travel / 0.02;		
     initial_bearing = getBearingInDegrees()		
     rotateUntilBearing(target_bearing, initial_bearing)		
     move_forwards()		
     while robot.step(TIME_STEP) != -1:		
-          distance = np.sqrt((gps.getValues()[0])**2 + (-0.4 - gps.getValues()[2])**2);		
+          distance = math.sqrt((gps.getValues()[0])**2 + (-0.4 - gps.getValues()[2])**2);		
           if distance <= 0.2:		
               motor_left.setVelocity(0.0)		
               motor_right.setVelocity(0.0)		
@@ -339,7 +339,8 @@ while robot.step(TIME_STEP) != -1:
     #rotateTheta(355) 		
   	#blockGPS, blockBearings, blockDistances = getBlockData() #getBlockData returns multiple lists so assign them all		
     #rotateUntilBearing(blockBearings[0],getBearingInDegrees()) 	
-    print("Green starting block", i+1)		
+    print("Green starting block", i+1)	
+    recievedCoordinate, mextTargetIdentified = receivingData()
     #initial scan:		
     if scanblocks == False:		
         current_bearing = getBearingInDegrees()		
@@ -347,9 +348,12 @@ while robot.step(TIME_STEP) != -1:
         scanblocks = True		
     		
     if scanblocks==True and gotblock == False:
-        
-        GPSOfBlocks, bearings, distances = getBlockData()
-        indicesToRemoveForCollected = []
+        if nextTargetSelected = False:
+		GPSOfBlocks, bearings, distances = getBlockData()
+		indicesToRemoveForCollected = []
+	if nextTargetIdentified == True:
+        	nextTargetIdentified = False
+        	GPSOfBlocks = receivingData[0]
         
         #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE
         for i in range(len(GPSOfBlocks)):
@@ -380,7 +384,7 @@ while robot.step(TIME_STEP) != -1:
                     #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again		
                     xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]		
                     zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]			
-                    distanceBetweenReadings = np.sqrt(xdelta**2 + zdelta**2)		
+                    distanceBetweenReadings = math.sqrt(xdelta**2 + zdelta**2)		
                  		
                     if distanceBetweenReadings < 0.15:		
                         #This means the same block is being read again. Delete it from the front of the list		
@@ -403,7 +407,7 @@ while robot.step(TIME_STEP) != -1:
         while robot.step(TIME_STEP) != -1:	       		
             xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]		
             zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]		
-            distance = np.sqrt(xdiff**2 + zdiff**2)	
+            distance = math.sqrt(xdiff**2 + zdiff**2)	
             		
             if distance < 0.1:		
                 motor_left.setVelocity(0)		

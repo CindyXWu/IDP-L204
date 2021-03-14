@@ -10,7 +10,9 @@ robot = Robot()
 us_right = robot.getDevice("us_right")	
 us_left = robot.getDevice("us_left")	
 ir = robot.getDevice("ir")	
-light_sensor = robot.getDevice("TEPT4400")	
+light_sensor = robot.getDevice("TEPT4400") #this one is angled forwards
+light_sensor_l = robot.getDevice("TEPT4400_left") #this one is angled slightly inwards
+light_sensor_r = robot.getDevice("TEPT4400_right") #this one is straight down	
 motor_left = robot.getDevice("Wheel_L")	
 motor_right = robot.getDevice("Wheel_R")	
 arm_left = robot.getDevice("Arm_L")	
@@ -23,6 +25,8 @@ us_right.enable(TIME_STEP)
 us_left.enable(TIME_STEP)	
 ir.enable(TIME_STEP)	
 light_sensor.enable(TIME_STEP)	
+light_sensor_l.enable(TIME_STEP)
+light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)	
 gps.enable(TIME_STEP)	
 	
@@ -33,8 +37,8 @@ def move_forwards():
     motor_left.setVelocity(0.5 * MAX_SPEED)	
     motor_right.setVelocity(0.5 * MAX_SPEED)	
 def open_arms():	
-    arm_left.setPosition(0.5)	
-    arm_right.setPosition(-0.5)	
+    arm_left.setPosition(0.3)	
+    arm_right.setPosition(-0.3)	
 def close_arms():	
     arm_left.setPosition(0) 	
     arm_right.setPosition(0)   	
@@ -48,7 +52,6 @@ def rotate_CW():
     motor_right.setPosition(float('inf'))	
     motor_left.setVelocity(0.2 * MAX_SPEED)	
     motor_right.setVelocity(-0.2 * MAX_SPEED)	
-    	
 def shuffle_back():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
@@ -82,12 +85,16 @@ def getColour(): #renamed to getColour to keep consistent reference in main loop
     #this function only checks if the sensor is returning a high value	
     #The colour of the LED will depend on the robot, b/c different filters are applied	
     #block in proximity, robot green: checkLED high => green LED, checkLED low => red LED	
-    raw = light_sensor.getValue()	
-    if raw > 0.55: #no need to use lookup table, we already estimated this as threshold	
-        led = True #Green	
+    raw1 = light_sensor.getValue()	
+    raw2 = light_sensor_l.getValue()
+    raw3 = light_sensor_r.getValue()
+    
+    if raw1 > 0.7 or raw2 > 0.7 or raw3 > 0.7: #no need to use lookup table, we already estimated this as threshold	
+        led = True #GREEN	
     else:	
-        led = False #Red	
+        led = False #RED	
     return led	
+	
 def getRawSensorValues():	
     ir_value = ir.getValue()	
     us_r_value = us_right.getValue()	
@@ -223,7 +230,7 @@ def getBlockData():
     #1. Large jump between previous value	
     #2. Large difference between distance value recorded and average distance value	
     #calculated above	
-        if (sensorValueScan[i - 1][2] - alpha) > 0.1:	
+        if (sensorValueScan[i - 1][2] - alpha) > 0.15:	
             blockBearings.append(sensorValueScan[i][3])	
             blockDistances.append(alpha)	
     for i in range(len(blockBearings)):	
@@ -353,7 +360,7 @@ while robot.step(TIME_STEP) != -1:
                 motor_right.setVelocity(0)	
                 colour = getColour();	
                 if colour == False:	
-                    print("Red block found")	
+                    print("Green bot has located a red block")	
                     shuffle_back_short()	
                     scanblocks=False	
                     wrongBlocks.append(GPSOfBlocks[0])	
@@ -362,7 +369,7 @@ while robot.step(TIME_STEP) != -1:
                 elif colour == True:	
                     close_arms()	
                     blockgreen=True	
-                    print("Green block found")	
+                    print("Green bot has located a green block")	
                     moveblock = False	
                     gotblock = True	
                     break	

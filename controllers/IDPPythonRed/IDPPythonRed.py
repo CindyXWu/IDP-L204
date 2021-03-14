@@ -10,7 +10,9 @@ robot = Robot()
 us_right = robot.getDevice("us_right")	
 us_left = robot.getDevice("us_left")	
 ir = robot.getDevice("ir")	
-light_sensor = robot.getDevice("TEPT4400")	
+light_sensor = robot.getDevice("TEPT4400")
+light_sensor_l = robot.getDevice("TEPT4400_left")
+light_sensor_r = robot.getDevice("TEPT4400_right")
 motor_left = robot.getDevice("Wheel_L")	
 motor_right = robot.getDevice("Wheel_R")	
 arm_left = robot.getDevice("Arm_L")	
@@ -22,7 +24,9 @@ gps = robot.getDevice("gps")
 us_right.enable(TIME_STEP)	
 us_left.enable(TIME_STEP)	
 ir.enable(TIME_STEP)	
-light_sensor.enable(TIME_STEP)	
+light_sensor.enable(TIME_STEP)
+light_sensor_l.enable(TIME_STEP)
+light_sensor_r.enable(TIME_STEP)	
 compass.enable(TIME_STEP)	
 gps.enable(TIME_STEP)	
 	
@@ -33,8 +37,8 @@ def move_forwards():
     motor_left.setVelocity(0.5 * MAX_SPEED)	
     motor_right.setVelocity(0.5 * MAX_SPEED)	
 def open_arms():	
-    arm_left.setPosition(0.5)	
-    arm_right.setPosition(-0.5)	
+    arm_left.setPosition(0.2)	
+    arm_right.setPosition(-0.2)	
 def close_arms():	
     arm_left.setPosition(0) 	
     arm_right.setPosition(0)   	
@@ -48,42 +52,41 @@ def rotate_CW():
     motor_right.setPosition(float('inf'))	
     motor_left.setVelocity(0.2 * MAX_SPEED)	
     motor_right.setVelocity(-0.2 * MAX_SPEED)	
-    	
 def shuffle_back():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
     motor_left.setVelocity(-0.5 * MAX_SPEED)	
-    motor_right.setVelocity(-0.5 * MAX_SPEED)	
-    	
+    motor_right.setVelocity(-0.5 * MAX_SPEED)		
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
       if i==120:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
-        break
-        
+        break       
 def shuffle_back_short():
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
     motor_left.setVelocity(-0.5 * MAX_SPEED)	
-    motor_right.setVelocity(-0.5 * MAX_SPEED)	
-    	
+    motor_right.setVelocity(-0.5 * MAX_SPEED)	    	
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
       if i==50:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
-        break
-        
-    	
+        break       
+         
+#==================================SENSING FUNCTIONS=====================   	
 def getColour(): #renamed to getColour to keep consistent reference in main loop	
     #this function only checks if the sensor is returning a high value	
     #The colour of the LED will depend on the robot, b/c different filters are applied	
     #block in proximity, robot green: checkLED high => green LED, checkLED low => red LED	
-    raw = light_sensor.getValue()	
-    if raw > 0.55: #no need to use lookup table, we already estimated this as threshold	
+    raw1 = light_sensor.getValue()	
+    raw2 = light_sensor_l.getValue()
+    raw3 = light_sensor_r.getValue()
+    
+    if raw1 > 0.7 or raw2 > 0.7 or raw3 > 0.7: #no need to use lookup table, we already estimated this as threshold	
         led = True #Red	
     else:	
         led = False #Green	
@@ -309,6 +312,7 @@ blockred = False  #what color of robot is this controller for? I think the curre
 wrongBlocks = []	
 rightBlocks = []	
 while robot.step(TIME_STEP) != -1:	
+
     ## NEXT COMMENTED BIT IS PROBABLY TESTING RELIC:	
 	#values = getSensorValues() #read sensor vals	
     #sensorValueScan.append(values) #append sensor vals onto list	
@@ -357,14 +361,14 @@ while robot.step(TIME_STEP) != -1:
                 motor_right.setVelocity(0)	
                 colour = getColour();	
                 if colour == True:	
-                    print("Red block found")	
+                    print("Red bot has located a red block")	
                     close_arms()	
                     blockred=True		
                     moveblock = False	
                     gotblock = True	
                     break	
                 elif colour == False:
-                    print("Green block found")		
+                    print("Red bot has located a green block")		
                     shuffle_back_short()	
                     scanblocks = False	
                     wrongBlocks.append(GPSOfBlocks[0])	

@@ -34,7 +34,8 @@ nextTargetIdentified = False
 #---------------------------Communication Functions---------------------------------------------------------------
 def foundRed(gpsLocation):		
     message = struct.pack("chd","wrong_colour",gpsLocation)		
-    emmitter.send(message)		
+    emmitter.send(message)
+    print('test')
 def target(gpsLocation):		
     message = struct.pack("chd","target",gpsLocation)		
     emitter.send(message)		

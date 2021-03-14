@@ -39,10 +39,10 @@ Emitter {
         }		
       ]		
       endPoint Solid {		
-        translation -0.045 -0.02 0.15		
+        translation -0.045 -0.02 0.13		
         children [		
           DEF Arm_end Solid {		
-            translation 0.01 -0.005 0.065		
+            translation 0.01 -0.005 0.045		
             children [		
               DEF Arm_end Shape {		
                 appearance PBRAppearance {		
@@ -62,7 +62,7 @@ Emitter {
               baseColor 0 0 0		
             }		
             geometry Box {		
-              size 0.01 0.01 0.14		
+              size 0.01 0.01 0.1		
             }		
           }		
         ]		
@@ -83,11 +83,11 @@ Emitter {
         }		
       ]		
       endPoint Solid {		
-        translation 0.045 -0.02 0.15		
+        translation 0.045 -0.02 0.13		
         rotation 0.8786299483244112 0.00013268993011740653 -0.4775032945444721 4.2146848510894035e-08		
         children [		
           DEF Arm_end Solid {		
-            translation -0.01 -0.005 0.065		
+            translation -0.01 -0.005 0.045		
             children [		
               DEF Arm_end Shape {		
                 appearance PBRAppearance {		
@@ -107,7 +107,7 @@ Emitter {
               baseColor 0 0 0		
             }		
             geometry Box {		
-              size 0.01 0.01 0.14		
+              size 0.01 0.01 0.1		
             }		
           }		
         ]		

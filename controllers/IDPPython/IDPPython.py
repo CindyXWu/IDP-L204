@@ -19,7 +19,8 @@ arm_left = robot.getDevice("Arm_L")
 arm_right = robot.getDevice("Arm_R")		
 compass = robot.getDevice("compass")		
 gps = robot.getDevice("gps")		
-		
+receiver = robot.getDevice("receiver")		
+emitter = robot.getDevice("emitter")			
 #enable devices		
 us_right.enable(TIME_STEP)		
 us_left.enable(TIME_STEP)		
@@ -29,7 +30,30 @@ light_sensor_l.enable(TIME_STEP)
 light_sensor_r.enable(TIME_STEP)	
 compass.enable(TIME_STEP)		
 gps.enable(TIME_STEP)		
-		
+receiver.enable(TIME_STEP)
+nextTargetIdentified = False		
+def foundRed(gpsLocation):		
+    message = struct.pack("chd","wrong_colour",gpsLocation)		
+    emmitter.send(message)		
+def target(gpsLocation):		
+    message = struct.pack("chd","target",gpsLocation)		
+    emitter.send(message)		
+def receivingData():	
+    try:	
+        message=receiver.getData()		
+        dataList=struct.unpack("chd",message)		
+        if message[0] == "wrong_colour": #Look I don't know how this thing works, it's definetly one of these		
+            nextTarget = message[1] #NEED TO TEST THIS< I'M NOT SURE
+            nextTargetIdentified = True
+            return nextTarget, nextTargetIdentified
+        if message[0] == "target":
+            otherRobotTarget = message[1]
+            nextTragetIdentified = False
+            return otherRobotTarget, nextTargetIdentified
+    except SystemError:
+        nextTargetIdentified = False
+        other = [0,0]
+        return other, nextTargetIdentified		
 #====================================MOTION FUNCTIONS=================================		
 def move_forwards():		
     motor_left.setPosition(float('inf'))		

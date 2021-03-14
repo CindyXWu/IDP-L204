@@ -348,12 +348,12 @@ while robot.step(TIME_STEP) != -1:
         scanblocks = True		
     		
     if scanblocks==True and gotblock == False:
-        if nextTargetSelected = False:
-		GPSOfBlocks, bearings, distances = getBlockData()
-		indicesToRemoveForCollected = []
-	if nextTargetIdentified == True:
-        	nextTargetIdentified = False
-        	GPSOfBlocks = receivingData[0]
+        if nextTargetIdentified == False:
+            GPSOfBlocks, bearings, distances = getBlockData()
+            indicesToRemoveForCollected = []
+        if nextTargetIdentified == True:
+        	 nextTargetIdentified = False
+        	 GPSOfBlocks = receivingData[0]
         
         #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE
         for i in range(len(GPSOfBlocks)):

@@ -30,31 +30,42 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)		
 gps.enable(TIME_STEP)		
 receiver.enable(TIME_STEP)
+#emitter.enable(TIME_STEP)
 nextTargetIdentified = False
 #---------------------------Communication Functions---------------------------------------------------------------
+#0 means wrong colour, 1 means target
 def foundRed(gpsLocation):		
-    message = struct.pack("chd","wrong_colour",gpsLocation)		
-    emmitter.send(message)
-    print('test')
+    message = struct.pack("idd",0,gpsLocation[0],gpsLocation[1])		
+    emitter.send(message)
 def target(gpsLocation):		
-    message = struct.pack("chd","target",gpsLocation)		
+    message = struct.pack("idd",1,gpsLocation[0],gpsLocation[1])		
     emitter.send(message)		
 def receivingData():	
     try:	
         message=receiver.getData()		
-        dataList=struct.unpack("chd",message)		
-        if message[0] == "wrong_colour": #Look I don't know how this thing works, it's definetly one of these		
-            nextTarget = message[1] #NEED TO TEST THIS< I'M NOT SURE
+        dataList=struct.unpack("idd",message)
+        print(dataList[0])		
+        if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these		
+            nextTarget = (dataList[1],dataList[2]) #NEED TO TEST THIS< I'M NOT SURE
             nextTargetIdentified = True
+            print("Green in Happy branch 0")
             return nextTarget, nextTargetIdentified
-        if message[0] == "target":
-            otherRobotTarget = message[1]
+        if dataList[0] == 1:
+            otherRobotTarget = (dataList[1],dataList[2])
             nextTragetIdentified = False
+            print("Green in Happy branch 1")
             return otherRobotTarget, nextTargetIdentified
     except SystemError:
+        print("Green in error branch")
         nextTargetIdentified = False
         other = [0,0]
-        return other, nextTargetIdentified		
+        return other, nextTargetIdentified	
+def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
+    if abs(otherRobotTarget[0] - thisRobotTarget[0]) == 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) == 0.05:
+        sameTarget = True
+    else:
+        sameTarget = False
+    return sameTarget
 #====================================MOTION FUNCTIONS=================================		
 def move_forwards():		
     motor_left.setPosition(float('inf'))		
@@ -341,7 +352,7 @@ while robot.step(TIME_STEP) != -1:
   	#blockGPS, blockBearings, blockDistances = getBlockData() #getBlockData returns multiple lists so assign them all		
     #rotateUntilBearing(blockBearings[0],getBearingInDegrees()) 	
     print("Green starting block", i+1)	
-    recievedCoordinate, mextTargetIdentified = receivingData()
+    receivedCoordinate, nextTargetIdentified = receivingData()
     #initial scan:		
     if scanblocks == False:		
         current_bearing = getBearingInDegrees()		

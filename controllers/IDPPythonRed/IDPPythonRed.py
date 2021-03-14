@@ -18,7 +18,8 @@ arm_left = robot.getDevice("Arm_L")
 arm_right = robot.getDevice("Arm_R")	
 compass = robot.getDevice("compass")	
 gps = robot.getDevice("gps")	
-	
+receiver = robot.getDevice("receiver")
+emitter = robot.getDevice("Emitter")	
 #enable devices	
 us_right.enable(TIME_STEP)	
 us_left.enable(TIME_STEP)	
@@ -29,11 +30,12 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)	
 gps.enable(TIME_STEP)	
 receiver.enable(TIME_STEP)
+#emitter.enable(TIME_STEP)
 nextTargetIdentified = False
 #---------------------------Communication Functions---------------------------------------------------------------
 def foundRed(gpsLocation):		
-    message = struct.pack("chd","wrong_colour",gpsLocation)		
-    emmitter.send(message)
+    message = ("wrong_colour",gpsLocation)		
+    emitter.send(message)
     print('test')
 def target(gpsLocation):		
     message = struct.pack("chd","target",gpsLocation)		
@@ -54,6 +56,7 @@ def receivingData():
         nextTargetIdentified = False
         other = [0,0]
         return other, nextTargetIdentified		
+#foundRed(123)
 #====================================MOTION FUNCTIONS=================================	
 def move_forwards():	
     motor_left.setPosition(float('inf'))	

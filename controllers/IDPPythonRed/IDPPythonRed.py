@@ -39,7 +39,10 @@ def foundGreen(gpsLocation):
     print('test')
 def target(gpsLocation):		
     message = struct.pack("idd",1,gpsLocation[0],gpsLocation[1])		
-    emitter.send(message)		
+    emitter.send(message)
+def sendCurrentLocation(gpsLocation):
+    message = struct.pack("idd",2,gpsLocation[0],gpsLocation[1])
+    emitter.send(message)			
 def receivingData():	
     try:	
         message=receiver.getData()		
@@ -59,7 +62,13 @@ def receivingData():
         nextTargetIdentified = False
         print("Red in Error branch")
         other = [0,0]
-        return other, nextTargetIdentified		
+        return other, nextTargetIdentified	
+def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
+    if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:
+        sameTarget = True
+    else:
+        sameTarget = False
+    return sameTarget	
 #====================================MOTION FUNCTIONS=================================	
 def move_forwards():	
     motor_left.setPosition(float('inf'))	
@@ -344,8 +353,18 @@ while robot.step(TIME_STEP) != -1:
     #rotateTheta(355) 	
   	#blockGPS, blockBearings, blockDistances = getBlockData() #getBlockData returns multiple lists so assign them all	
     #rotateUntilBearing(blockBearings[0],getBearingInDegrees()) # <-- what does this do?	
-    receivedCoordinate, nextTargetIdentified = receivingData()
     print("Starting block", i+1)	
+    
+    sendCurrentLocation(gps.getValues())	
+    receivedCoordinate, nextTargetIdentified = receivingData()
+    
+    if nextTargetIdentified == None:
+        coords = gps.getValues()
+        if abs(receivedCoordinates[0] - coords[0]) < 0.1 and abs(receivedCoordinates[1] - coords[1]) < 0.1:
+            print("collision time")
+            #avoidRobot() ####RUN FUNCTION TO AVOID THE OTHER ROBOT
+    receivedCoordinate, nextTargetIdentified = receivingData()
+    
     #initial scan:	
     if scanblocks == False:		
         current_bearing = getBearingInDegrees()		

@@ -37,8 +37,8 @@ def move_forwards():
     motor_left.setVelocity(0.5 * MAX_SPEED)	
     motor_right.setVelocity(0.5 * MAX_SPEED)	
 def open_arms():	
-    arm_left.setPosition(0.2)	
-    arm_right.setPosition(-0.2)	
+    arm_left.setPosition(0.1)	
+    arm_right.setPosition(-0.1)	
 def close_arms():	
     arm_left.setPosition(0) 	
     arm_right.setPosition(0)   	
@@ -86,7 +86,7 @@ def getColour(): #renamed to getColour to keep consistent reference in main loop
     raw2 = light_sensor_l.getValue()
     raw3 = light_sensor_r.getValue()
     
-    if raw1 > 0.7 or raw2 > 0.7 or raw3 > 0.7: #no need to use lookup table, we already estimated this as threshold	
+    if raw1 > 0.6 or raw2 > 0.6 or raw3 > 0.6: #no need to use lookup table, we already estimated this as threshold	
         led = True #Red	
     else:	
         led = False #Green	
@@ -193,11 +193,7 @@ def doScan(theta, initial_bearing):
         bearing = getBearingInDegrees()	
         values = getSensorValues()	
         sensorValueScan.append(values)		
-        	
-        if sensorValueScan[i-1][2]-values[2] > 0.15:	
-            print("Block detected at distance ", values[2])	
-        	
-                     	
+        	                  	
         i += 1	
         	
         if (bearing - initial_bearing) >= 0:	
@@ -230,7 +226,7 @@ def getBlockData():
     #1. Large jump between previous value	
     #2. Large difference between distance value recorded and average distance value	
     #calculated above	
-        if (sensorValueScan[i - 1][2] - alpha) > 0.15:	
+        if (sensorValueScan[i - 1][2] - alpha) > 0.12:	
             blockBearings.append(sensorValueScan[i][3])	
             blockDistances.append(alpha)	
     for i in range(len(blockBearings)):	
@@ -323,22 +319,32 @@ while robot.step(TIME_STEP) != -1:
     #initial scan:	
     if scanblocks == False:	
         current_bearing = getBearingInDegrees()	
-        sensorValueScan = doScan(350, current_bearing)	
-        print("Scanning finished for block", i+1)	
+        sensorValueScan = doScan(350, current_bearing)		
         scanblocks = True	
     	
     if scanblocks==True and gotblock == False:
-    		
-        GPSOfBlocks, bearings, distances = getBlockData()		
         
+        GPSOfBlocks, bearings, distances = getBlockData()
+        indicesToRemoveForCollected = []
+        
+        #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE
         for i in range(len(GPSOfBlocks)):
         
-            if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:	
-                print("Red removing already picked up block from scan")	
-                GPSOfBlocks.pop(i)	
-                bearings.pop(i)	
-                distances.pop(i)	
-        	
+            if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:
+            	
+                indicesToRemoveForCollected.append(i)
+        
+        #It is very important that we delete the higher index first, so that 
+        #by deleting indices one by one, we are not affecting remaining deletions
+        #And you know that indicesToRemoveForCollected has indices in ascending order
+        #So iterate through backwards
+        for index in sorted(indicesToRemoveForCollected, reverse=True):
+            
+            GPSOfBlocks.pop(index)
+            bearings.pop(index)
+            distances.pop(index)	
+        
+        #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED	
         if int(len(wrongBlocks)) > 0:
 
             indicesToRemove = []	
@@ -350,23 +356,26 @@ while robot.step(TIME_STEP) != -1:
                     zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]			
                     distanceBetweenReadings = np.sqrt(xdelta**2 + zdelta**2)		
                  		
-                    if distanceBetweenReadings < 0.07:		
+                    if distanceBetweenReadings < 0.12:		
                         #This means the same block is being read again. Delete it from the front of the list		
-                        indicesToRemove.append(i)	                       	
-        	
-        	for index in indicesToRemove:
+                        indicesToRemove.append(i)
+                        
+            #Same logic as above; we must iterate backwards         	                       	
+            for index in sorted(indicesToRemove,reverse=True):
                 
                 GPSOfBlocks.pop(index)
                 bearings.pop(index)
                 distances.pop(index)
-                     	
-        rotateUntilBearing(bearings[0], getBearingInDegrees())	
-        move_forwards()	
-        open_arms()   
-            
-        while robot.step(TIME_STEP) != -1:	       	
-            xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]	
-            zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]	
+        
+        print("Bearings detected red: ", bearings)
+        #NOW GOING TO ANY UNIVISITED BLOCKS
+        rotateUntilBearing(bearings[2], getBearingInDegrees())		
+        move_forwards()		
+        open_arms()   	
+            	
+        while robot.step(TIME_STEP) != -1:	       		
+            xdiff = GPSOfBlocks[2][0] - gps.getValues()[0]		
+            zdiff = GPSOfBlocks[2][1] - gps.getValues()[2]		
             distance = np.sqrt(xdiff**2 + zdiff**2)
             	
             if distance < 0.1:	
@@ -395,6 +404,6 @@ while robot.step(TIME_STEP) != -1:
         gotblock = False	
         scanblocks = False	
     i += 1	
-    if i == 8:	
+    if i == 15:	
         returnToStart()	
         break

@@ -33,12 +33,15 @@ receiver.enable(TIME_STEP)
 #emitter.enable(TIME_STEP)
 nextTargetIdentified = False
 #---------------------------Communication Functions---------------------------------------------------------------
-#0 means wrong colour, 1 means target
+#0 means wrong colour, 1 means target, 2 means current location
 def foundRed(gpsLocation):		
     message = struct.pack("idd",0,gpsLocation[0],gpsLocation[1])		
     emitter.send(message)
 def target(gpsLocation):		
     message = struct.pack("idd",1,gpsLocation[0],gpsLocation[1])		
+    emitter.send(message)
+def sendCurrentLocation(gpsLocation):
+    message = struct.pack("idd",2,gpsLocation[0],gpsLocation[1])
     emitter.send(message)		
 def receivingData():	
     try:	
@@ -55,13 +58,18 @@ def receivingData():
             nextTragetIdentified = False
             print("Green in Happy branch 1")
             return otherRobotTarget, nextTargetIdentified
+        if dataList[0] == 2:
+            print("Green is in Happy branch 2")
+            otherRobotLocation = (dataList[1],dataList[2])
+            nextTargetIdentified = None
+            return otherRobotLocation, nextTargetIdentified  
     except SystemError:
         print("Green in error branch")
         nextTargetIdentified = False
         other = [0,0]
         return other, nextTargetIdentified	
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
-    if abs(otherRobotTarget[0] - thisRobotTarget[0]) == 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) == 0.05:
+    if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:
         sameTarget = True
     else:
         sameTarget = False
@@ -351,21 +359,32 @@ while robot.step(TIME_STEP) != -1:
     #rotateTheta(355) 		
   	#blockGPS, blockBearings, blockDistances = getBlockData() #getBlockData returns multiple lists so assign them all		
     #rotateUntilBearing(blockBearings[0],getBearingInDegrees()) 	
-    print("Green starting block", i+1)	
+    print("Green starting block", i+1)
+    
+    sendCurrentLocation(gps.getValues())	
+    receivedCoordinate, nextTargetIdentified = receivingData()
+    
+    if nextTargetIdentified == None:
+        coords = gps.getValues()
+        if abs(receivedCoordinates[0] - coords[0]) < 0.1 and abs(receivedCoordinates[1] - coords[1]) < 0.1:
+            print("collision time")
+            #avoidRobot() ####RUN FUNCTION TO AVOID THE OTHER ROBOT
     receivedCoordinate, nextTargetIdentified = receivingData()
     #initial scan:		
-    if scanblocks == False:		
+    if scanblocks == False and nextTargetIdentified == False:		
         current_bearing = getBearingInDegrees()		
         sensorValueScan = doScan(350, current_bearing)			
-        scanblocks = True		
+        scanblocks = True
+        
+    if nextTargetIdentified == True and scanblocks == False:
+        GPSOfBlocks = receivedCoordinate
+        #######Call function to get bearings from gps
+        scanblocks = True	
     		
     if scanblocks==True and gotblock == False:
         if nextTargetIdentified == False:
             GPSOfBlocks, bearings, distances = getBlockData()
             indicesToRemoveForCollected = []
-        if nextTargetIdentified == True:
-        	 nextTargetIdentified = False
-        	 GPSOfBlocks = receivingData[0]
         
         #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE
         for i in range(len(GPSOfBlocks)):
@@ -429,7 +448,8 @@ while robot.step(TIME_STEP) != -1:
                     print("Green bot has located a red block")		
                     shuffle_back_short()		
                     scanblocks=False		
-                    wrongBlocks.append(GPSOfBlocks[0])		
+                    wrongBlocks.append(GPSOfBlocks[0])	
+                    foundRed(GPSOfBlocks[0])	
                     break		
                 		
                 elif colour == True:		

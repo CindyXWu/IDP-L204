@@ -192,7 +192,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry Box {		
                 size 0.02 0.01 0.05		
@@ -205,7 +205,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.666667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry IndexedFaceSet {		
                 coord Coordinate {		
@@ -227,7 +227,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.666667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry IndexedFaceSet {		
                 coord Coordinate {		
@@ -250,7 +250,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.666667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry Plane {		
                 size 0.0461 0.08		
@@ -265,7 +265,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.666667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry Plane {		
                 size 0.046098 0.08		
@@ -279,7 +279,7 @@ Emitter {
           children [		
             Shape {		
               appearance PBRAppearance {		
-                baseColor 0.666667 1 0		
+                baseColor 1 0.294 0		
               }		
               geometry Box {		
                 size 0.03 0.08 0.03		

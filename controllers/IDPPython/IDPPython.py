@@ -54,7 +54,14 @@ def receivingData():
     except SystemError:
         nextTargetIdentified = False
         other = [0,0]
-        return other, nextTargetIdentified		
+        return other, nextTargetIdentified	
+def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
+    if abs(otherRobotTarget[0] - thisRobotTarget[0]) == 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) == 0.05:
+	sameTarget = True
+    else:
+	sameTarget = False
+    return sameTarget
+
 #====================================MOTION FUNCTIONS=================================		
 def move_forwards():		
     motor_left.setPosition(float('inf'))		

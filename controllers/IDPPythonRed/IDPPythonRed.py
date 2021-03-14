@@ -230,7 +230,7 @@ def getBlockData():
     #1. Large jump between previous value	
     #2. Large difference between distance value recorded and average distance value	
     #calculated above	
-        if (sensorValueScan[i - 1][2] - alpha) > 0.1:	
+        if (sensorValueScan[i - 1][2] - alpha) > 0.15:	
             blockBearings.append(sensorValueScan[i][3])	
             blockDistances.append(alpha)	
     for i in range(len(blockBearings)):	
@@ -327,25 +327,38 @@ while robot.step(TIME_STEP) != -1:
         print("Scanning finished for block", i+1)	
         scanblocks = True	
     	
-    if scanblocks==True and gotblock == False:	
-        GPSOfBlocks, bearings, distances = getBlockData()	
+    if scanblocks==True and gotblock == False:
+    		
+        GPSOfBlocks, bearings, distances = getBlockData()		
+        
+        for i in range(len(GPSOfBlocks)):
+        
+            if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:	
+                print("Red removing already picked up block from scan")	
+                GPSOfBlocks.pop(i)	
+                bearings.pop(i)	
+                distances.pop(i)	
         	
-        if int(len(wrongBlocks)) > 0:	
+        if int(len(wrongBlocks)) > 0:
+
+            indicesToRemove = []	
+            		
+            for i in range(len(GPSOfBlocks)):		
+                for j in range(len(wrongBlocks)):			
+                    #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again		
+                    xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]		
+                    zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]			
+                    distanceBetweenReadings = np.sqrt(xdelta**2 + zdelta**2)		
+                 		
+                    if distanceBetweenReadings < 0.07:		
+                        #This means the same block is being read again. Delete it from the front of the list		
+                        indicesToRemove.append(i)	                       	
         	
-            for i in range(len(wrongBlocks)):	
-            	
-                #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again	
-                 xdelta = wrongBlocks[i][0]-GPSOfBlocks[0][0]	
-                 zdelta = wrongBlocks[i][1]-GPSOfBlocks[0][1]	
-                 distanceBetweenReadings = np.sqrt(xdelta**2 + zdelta**2)	
-                 	
-                 if distanceBetweenReadings < 0.07:	
-                     #This means the same block is being read again. Delete it from the front of the list	
-                     GPSOfBlocks.pop()	
-                     bearings.pop()	
-                     distances.pop()	
-                     break	
-                         
+        	for index in indicesToRemove:
+                
+                GPSOfBlocks.pop(index)
+                bearings.pop(index)
+                distances.pop(index)
                      	
         rotateUntilBearing(bearings[0], getBearingInDegrees())	
         move_forwards()	

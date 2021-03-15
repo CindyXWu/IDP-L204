@@ -19,7 +19,8 @@ arm_right = robot.getDevice("Arm_R")
 compass = robot.getDevice("compass")	
 gps = robot.getDevice("gps")	
 receiver = robot.getDevice("receiver")
-emitter = robot.getDevice("emitter")	
+emitter = robot.getDevice("emitter")
+	
 #enable devices	
 us_right.enable(TIME_STEP)	
 us_left.enable(TIME_STEP)	
@@ -30,8 +31,8 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)	
 gps.enable(TIME_STEP)	
 receiver.enable(TIME_STEP)
-#emitter.enable(TIME_STEP)
 nextTargetIdentified = False
+
 #---------------------------Communication Functions---------------------------------------------------------------
 def foundGreen(gpsLocation):		
     message = struct.pack("idd",0,gpsLocation[0],gpsLocation[1])		
@@ -73,8 +74,8 @@ def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
 def move_forwards():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(0.5 * MAX_SPEED)	
-    motor_right.setVelocity(0.5 * MAX_SPEED)	
+    motor_left.setVelocity(MAX_SPEED)	
+    motor_right.setVelocity(MAX_SPEED)	
 def open_arms():	
     arm_left.setPosition(0.1)	
     arm_right.setPosition(-0.1)	
@@ -117,15 +118,15 @@ def shuffle_back_short():
         break       
          
 #==================================SENSING FUNCTIONS=====================   	
-def getColour(): #renamed to getColour to keep consistent reference in main loop	
+def getColour():
     #this function only checks if the sensor is returning a high value	
     #The colour of the LED will depend on the robot, b/c different filters are applied	
-    #block in proximity, robot green: checkLED high => green LED, checkLED low => red LED	
+    	
     raw1 = light_sensor.getValue()	
     raw2 = light_sensor_l.getValue()
     raw3 = light_sensor_r.getValue()
     
-    if raw1 > 0.6 or raw2 > 0.6 or raw3 > 0.6: #no need to use lookup table, we already estimated this as threshold	
+    if raw1 > 0.58 or raw2 > 0.58 or raw3 > 0.58:
         led = True #Red	
     else:	
         led = False #Green	

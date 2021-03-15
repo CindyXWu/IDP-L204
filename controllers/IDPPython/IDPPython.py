@@ -1,7 +1,7 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter		
 import math		
 import struct		
-TIME_STEP = 32		
+TIME_STEP = 16		
 MAX_SPEED = 10		
 # create a robot		
 robot = Robot() 		
@@ -19,7 +19,8 @@ arm_right = robot.getDevice("Arm_R")
 compass = robot.getDevice("compass")		
 gps = robot.getDevice("gps")		
 receiver = robot.getDevice("receiver")		
-emitter = robot.getDevice("emitter")			
+emitter = robot.getDevice("emitter")#
+			
 #enable devices		
 us_right.enable(TIME_STEP)		
 us_left.enable(TIME_STEP)		
@@ -30,8 +31,8 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)		
 gps.enable(TIME_STEP)		
 receiver.enable(TIME_STEP)
-#emitter.enable(TIME_STEP)
 nextTargetIdentified = False
+
 #---------------------------Communication Functions---------------------------------------------------------------
 #0 means wrong colour, 1 means target, 2 means current location
 def foundRed(gpsLocation):		
@@ -67,45 +68,47 @@ def receivingData():
         print("Green in error branch")
         nextTargetIdentified = False
         other = [0,0]
-        return other, nextTargetIdentified	
+        return other, nextTargetIdentified
+        	
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
     if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:
         sameTarget = True
     else:
         sameTarget = False
     return sameTarget
+    
 #====================================MOTION FUNCTIONS=================================		
 def move_forwards():		
     motor_left.setPosition(float('inf'))		
     motor_right.setPosition(float('inf'))		
-    motor_left.setVelocity(0.5 * MAX_SPEED)		
-    motor_right.setVelocity(0.5 * MAX_SPEED)		
+    motor_left.setVelocity(MAX_SPEED)		
+    motor_right.setVelocity(MAX_SPEED)		
 def open_arms():		
-    arm_left.setPosition(0.1)		
-    arm_right.setPosition(-0.1)		
+    arm_left.setPosition(0.25)		
+    arm_right.setPosition(-0.25)		
 def close_arms():		
     arm_left.setPosition(0) 		
     arm_right.setPosition(0)   		
 def rotate_ACW():		
     motor_left.setPosition(float('inf'))		
     motor_right.setPosition(float('inf'))		
-    motor_left.setVelocity(-0.2 * MAX_SPEED)		
-    motor_right.setVelocity(0.2 * MAX_SPEED)		
+    motor_left.setVelocity(-0.4 * MAX_SPEED)		
+    motor_right.setVelocity(0.4 * MAX_SPEED)		
 def rotate_CW():		
     motor_left.setPosition(float('inf'))		
     motor_right.setPosition(float('inf'))		
-    motor_left.setVelocity(0.2 * MAX_SPEED)		
-    motor_right.setVelocity(-0.2 * MAX_SPEED)		
+    motor_left.setVelocity(0.4 * MAX_SPEED)		
+    motor_right.setVelocity(-0.4 * MAX_SPEED)		
 def shuffle_back():		
     motor_left.setPosition(float('inf'))		
     motor_right.setPosition(float('inf'))		
-    motor_left.setVelocity(-0.5 * MAX_SPEED)		
-    motor_right.setVelocity(-0.5 * MAX_SPEED)		
+    motor_left.setVelocity(-0.8 * MAX_SPEED)		
+    motor_right.setVelocity(-0.8 * MAX_SPEED)		
     		
     i=0		
     while robot.step(TIME_STEP) != -1:		
       i += 1		
-      if i==120:		
+      if i==200:		
         motor_left.setVelocity(0)		
         motor_right.setVelocity(0)		
         break	
@@ -113,30 +116,30 @@ def shuffle_back():
 def shuffle_back_short():	
     motor_left.setPosition(float('inf'))		
     motor_right.setPosition(float('inf'))		
-    motor_left.setVelocity(-0.5 * MAX_SPEED)		
-    motor_right.setVelocity(-0.5 * MAX_SPEED)		
+    motor_left.setVelocity(-0.8 * MAX_SPEED)		
+    motor_right.setVelocity(-0.8 * MAX_SPEED)		
     		
     i=0		
     while robot.step(TIME_STEP) != -1:		
       i += 1		
-      if i==50:		
+      if i==90:		
         motor_left.setVelocity(0)		
         motor_right.setVelocity(0)		
         break	
         	
     		
-def getColour(): #renamed to getColour to keep consistent reference in main loop		
+def getColour():	
     #this function only checks if the sensor is returning a high value		
     #The colour of the LED will depend on the robot, b/c different filters are applied		
-    #block in proximity, robot green: checkLED high => green LED, checkLED low => red LED		
+   
     raw1 = light_sensor.getValue()		
     raw2 = light_sensor_l.getValue()	
     raw3 = light_sensor_r.getValue()	
     	
-    if raw1 > 0.7 or raw2 > 0.7 or raw3 > 0.7: #no need to use lookup table, we already estimated this as threshold		
-        led = True #GREEN		
+    if raw1 > 0.58 or raw2 > 0.58 or raw3 > 0.58: 
+        led = True #Green
     else:		
-        led = False #RED		
+        led = False #Red		
     return led		
 		
 def getRawSensorValues():		
@@ -353,13 +356,6 @@ wrongBlocks = []
 rightBlocks = []
 		
 while robot.step(TIME_STEP) != -1:		
-    ## NEXT COMMENTED BIT IS PROBABLY TESTING RELIC:		
-	#values = getSensorValues() #read sensor vals		
-    #sensorValueScan.append(values) #append sensor vals onto list		
-    #rotateTheta(355) 		
-  	#blockGPS, blockBearings, blockDistances = getBlockData() #getBlockData returns multiple lists so assign them all		
-    #rotateUntilBearing(blockBearings[0],getBearingInDegrees()) 	
-    print("Green starting block", i+1)
     
     sendCurrentLocation(gps.getValues())	
     receivedCoordinate, nextTargetIdentified = receivingData()

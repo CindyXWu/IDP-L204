@@ -1,7 +1,7 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter		
 import math	
 import struct	
-TIME_STEP = 16
+TIME_STEP = 32	
 MAX_SPEED = 10	
 # create a robot	
 robot = Robot() 	
@@ -19,8 +19,7 @@ arm_right = robot.getDevice("Arm_R")
 compass = robot.getDevice("compass")	
 gps = robot.getDevice("gps")	
 receiver = robot.getDevice("receiver")
-emitter = robot.getDevice("emitter")
-	
+emitter = robot.getDevice("emitter")	
 #enable devices	
 us_right.enable(TIME_STEP)	
 us_left.enable(TIME_STEP)	
@@ -31,6 +30,7 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)	
 gps.enable(TIME_STEP)	
 receiver.enable(TIME_STEP)
+#emitter.enable(TIME_STEP)
 nextTargetIdentified = False
 #---------------------------Communication Functions---------------------------------------------------------------
 def foundGreen(gpsLocation):		

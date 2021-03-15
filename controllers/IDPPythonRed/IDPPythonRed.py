@@ -80,8 +80,8 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)	
     motor_right.setVelocity(MAX_SPEED)	
 def open_arms():	
-    arm_left.setPosition(0.25)	
-    arm_right.setPosition(-0.25)	
+    arm_left.setPosition(0.2)	
+    arm_right.setPosition(-0.2)	
 def close_arms():	
     arm_left.setPosition(0) 	
     arm_right.setPosition(0)   	
@@ -471,10 +471,9 @@ while robot.step(TIME_STEP) != -1:
 
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
-    if scanblocks == False and nextTargetIdentified == False:
-        rotateUntilBearing(0,getBearingInDegrees())			
+    if scanblocks == False and nextTargetIdentified == False:		
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(178, current_bearing)				
+        sensorValueScan = doScan(355, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			

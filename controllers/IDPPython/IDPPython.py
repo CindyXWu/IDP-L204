@@ -83,8 +83,8 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)			
     motor_right.setVelocity(MAX_SPEED)			
 def open_arms():			
-    arm_left.setPosition(0.25)			
-    arm_right.setPosition(-0.25)			
+    arm_left.setPosition(0.2)			
+    arm_right.setPosition(-0.2)			
 def close_arms():			
     arm_left.setPosition(0) 			
     arm_right.setPosition(0)   			
@@ -399,13 +399,13 @@ def alternateRoute(desiredxpos, desiredzpos):
         rotateUntilBearing(180, getBearingInDegrees())
         move_forwards()
         
-        while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.1:	       		
+        while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.15:	       		
             xdiff = -0.6 - gps.getValues()[0] - 0.02
             
         rotateUntilBearing(zbearing, getBearingInDegrees())
         move_forwards()
         
-        while robot.step(TIME_STEP) != -1 and abs(zdiff) > 0.1:
+        while robot.step(TIME_STEP) != -1 and abs(zdiff) > 0.15:
                 zdiff = desiredzpos - gps.getValues()[2]
                 
         bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
@@ -413,13 +413,13 @@ def alternateRoute(desiredxpos, desiredzpos):
         move_forwards()
         open_arms()
     
-        while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
+        while robot.step(TIME_STEP) != -1 and distance > 0.07:	       		
             xdiff = desiredxpos - gps.getValues()[0]		
             zdiff = desiredzpos - gps.getValues()[2]		
             distance = math.sqrt(xdiff**2 + zdiff**2)
             
 #Gets a bearing when given a position           	      	
-def getBearingToPoint(x=0, y=0, z=0.4):
+def getBearingToPoint(x=0, y=0, z=-0.4):
     initial_position = [x,y,z]#for historical reasons, this is confusingly actually the target position
     current_position = gps.getValues()
     target_bearing = 0.0
@@ -477,10 +477,9 @@ while robot.step(TIME_STEP) != -1:
 
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
-    if scanblocks == False and nextTargetIdentified == False:
-        rotateUntilBearing(0,getBearingInDegrees())			
+    if scanblocks == False and nextTargetIdentified == False:			
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(175, current_bearing)				
+        sensorValueScan = doScan(355, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			
@@ -531,8 +530,11 @@ while robot.step(TIME_STEP) != -1:
                     distances.pop(index)	
                 
         #NOW GOING TO ANY UNVISITED BLOCKS	
-        	
-        checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])	
+        try:
+            checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
+        except IndexError:
+            returnToStart()
+            break	
         	
         if checkgoround == False:	
             rotateUntilBearing(bearings[0], getBearingInDegrees())			

@@ -254,7 +254,7 @@ def doScan(theta, initial_bearing):
         i += 1			
         			
         if (bearing - initial_bearing) >= 0:			
-            angle_rotated = bearing - initial_bearing			
+            angle_rotated = bearing - initial_bearinggit b			
         if bearing - initial_bearing < 0:			
             angle_rotated = bearing + (360 - initial_bearing)			
         if angle_rotated > theta:			
@@ -481,7 +481,8 @@ while robot.step(TIME_STEP) != -1:
 
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
-    if scanblocks == False and nextTargetIdentified == False:			
+    if scanblocks == False and nextTargetIdentified == False:
+        rotateUntilBearing(90,getBearingInDegrees)			
         current_bearing = getBearingInDegrees()			
         sensorValueScan = doScan(175, current_bearing)				
         scanblocks = True		

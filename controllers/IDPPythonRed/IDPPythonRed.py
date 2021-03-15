@@ -486,7 +486,7 @@ while robot.step(TIME_STEP) != -1:
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
     if scanblocks == False and nextTargetIdentified == False:
-        rotateUntilBearing(90)			
+        rotateUntilBearing(90,getBearingInDegrees())			
         current_bearing = getBearingInDegrees()			
         sensorValueScan = doScan(175, current_bearing)				
         scanblocks = True		

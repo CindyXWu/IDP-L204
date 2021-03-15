@@ -57,6 +57,11 @@ def receivingData():
             nextTargetIdentified = False
             #print("Red in Happy branch 1")
             return otherRobotTarget, nextTargetIdentified
+        if dataList[0] == 2:
+            print("Red is in Happy branch 2")
+            otherRobotLocation = (dataList[1],dataList[2])
+            nextTargetIdentified = None
+            return otherRobotLocation, nextTargetIdentified  
     except SystemError:
         nextTargetIdentified = False
         print("Red in Error branch")

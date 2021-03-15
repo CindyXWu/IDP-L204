@@ -46,7 +46,7 @@ def receivingData():
     try:	
         message=receiver.getData()		
         dataList=struct.unpack("idd",message)
-        print(dataList[0])		
+        #print(dataList[0])		
         if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these		
             nextTarget = (dataList[1],dataList[2]) #NEED TO TEST THIS< I'M NOT SURE
             nextTargetIdentified = True
@@ -75,8 +75,8 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)	
     motor_right.setVelocity(MAX_SPEED)	
 def open_arms():	
-    arm_left.setPosition(0.1)	
-    arm_right.setPosition(-0.1)	
+    arm_left.setPosition(0.25)	
+    arm_right.setPosition(-0.25)	
 def close_arms():	
     arm_left.setPosition(0) 	
     arm_right.setPosition(0)   	
@@ -284,31 +284,34 @@ def getBlockData():
 def checkStartCross(targetxpos, targetzpos, returnTrip = False): 		
     		
     nsamples = 20
-    reroute = False		
+    reroute = False
+    startvsl = 1		
     			 		
     current_position = gps.getValues()
     
-    print("current x = ", current_position[0])		
-    print("block x = ", targetxpos)		
-    print("current z = ", current_position[2])		
-    print("block z = ", targetzpos)		
-    		
+    #print("current x = ", current_position[0])		
+    #print("block x = ", targetxpos)		
+    #print("current z = ", current_position[2])		
+    #print("block z = ", targetzpos)		
+    	
+    if abs(current_position[0]) < 0.2 and 0.2 < abs(current_position[2]) < 0.6:
+        startval = 10	
 		
-    for j in range(3, nsamples): #starts at j=3 so a false positive isn't raised at the start		
+    for j in range(startval, nsamples): #starts at j=startval so a false positive isn't raised at the start		
         xsampledpos = (current_position[0] + ((j/nsamples)*(targetxpos - current_position[0])))		
         zsampledpos = (current_position[2] + ((j/nsamples)*(targetzpos - current_position[2])))
         #print(xsampledpos, zsampledpos)				
         if abs(xsampledpos) < 0.2 and 0.2 < abs(zsampledpos) < 0.6 and returnTrip == False:		
-            print ("Line passes through either red or green starting square")
+            #print ("Line passes through either red or green starting square")
             reroute = True
         if abs(xsampledpos) < 0.2 and -0.6 < zsampledpos < -0.2 and returnTrip == True:
-            print ("Line passes through green starting square")
+            #print ("Line passes through green starting square")
             reroute = True		
     		
     return reroute #put here what you want to be returned	
 #======================= Navigation function for going around starting squares =====================
 def alternateRoute(desiredxpos, desiredzpos):
-    print("doing alternate route")
+    #print("doing alternate route")
     motor_left.setVelocity(0.0)		
     motor_right.setVelocity(0.0)
     xdiff = 1
@@ -318,18 +321,18 @@ def alternateRoute(desiredxpos, desiredzpos):
     twopointturn = False
     
     if abs(gps.getValues()[0]) < 0.2 and abs(desiredxpos) < 0.2:
-        print("2 turns needed to navigate around squares along z-line")
+        #print("2 turns needed to navigate around squares along z-line")
         twopointturn = True
-    elif 0.2 < abs(gps.getValues()[2]) < 0.6 and 0.2 < abs(desiredzpos) < 0.6:
-        print("This shouldn't happen in two halves! What have you done?")
+    #elif 0.2 < abs(gps.getValues()[2]) < 0.6 and 0.2 < abs(desiredzpos) < 0.6:
+        #print("This shouldn't happen in two halves! What have you done?")
     elif abs(gps.getValues()[0]) < 0.2 and abs(desiredxpos) > 0.2:
-        print("x needs to be done first")
+        #print("x needs to be done first")
         zfirst = False
     elif abs(gps.getValues()[0]) > 0.2 and abs(desiredxpos) < 0.2:
-        print("z needs to be done first")
+        #print("z needs to be done first")
         zfirst = True
-    else:
-        print("No special conditions needed. Doing x first")
+    #else:
+        #print("No special conditions needed. Doing x first")
     
     if bearings[0] < 90:
         xbearing = 0
@@ -408,46 +411,24 @@ def getBearingToPoint(x = 0, y = 0, z = 0.4):
     target_bearing = 0.0			
     if current_position[2] < initial_position[2]:			
         target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)			
-        print("condition 1") 			
-    			
+        #print("condition 1") 						
     if current_position[2] > initial_position[2]:			
         target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)			
-        print("condition 2")			
-    			
+        #print("condition 2")				
     if current_position[2] == initial_position[2] and current_position[0] > initial_position[0]:			
         target_bearing = 180.0			
-        print("condition 3")			
+        #print("condition 3")			
     if current_position[2] == initial_position[2] and current_position[0] < initial_position[0]:			
         target_bearing = 0.0			
-        print("condition 4")			
-    if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:			
-        print("condition 5")	
+        #print("condition 4")			
+    #if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:			
+        #print("condition 5")	
         	
     return target_bearing
 #======================= Return to initial position =====================	
 def returnToStart():	
     	
-    initial_position = [0, 0, 0.4]	
-    current_position = gps.getValues()	
-    target_bearing = 0.0	
-    if current_position[2] < initial_position[2]:	
-        target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)	
-        print("condition 1") 	
-    	
-    if current_position[2] > initial_position[2]:	
-        target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)	
-        print("condition 2")	
-    	
-    if current_position[2] == initial_position[2] and current_position[0] > initial_position[0]:	
-        target_bearing = 180.0	
-        print("condition 3")	
-    if current_position[2] == initial_position[2] and current_position[0] < initial_position[0]:	
-        target_bearing = 0.0	
-        print("condition 4")	
-    if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:	
-        print("condition 5")	
-    #distance_to_travel = math.sqrt((current_position[0] - initial_position[0])**2 + (current_position[2] - initial_position[2])**2)	
-    #double wheel_angle_to_rotate = distance_to_travel / 0.02;	
+    target_bearing = getBearingToPoint()	
     initial_bearing = getBearingInDegrees()	
     rotateUntilBearing(target_bearing, initial_bearing)	
     move_forwards()	
@@ -486,7 +467,7 @@ while robot.step(TIME_STEP) != -1:
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
     if scanblocks == False and nextTargetIdentified == False:
-        rotateUntilBearing(90,getBearingInDegrees())			
+        rotateUntilBearing(0,getBearingInDegrees())			
         current_bearing = getBearingInDegrees()			
         sensorValueScan = doScan(175, current_bearing)				
         scanblocks = True		
@@ -601,12 +582,12 @@ while robot.step(TIME_STEP) != -1:
     	
     #TAKING BLOCK TO START POINT     			
     if moveblock == False and blockred==True:	
-        altRoute = checkStartCross(0, -0.4, True)				
+        altRoute = checkStartCross(0, 0.4, True)				
         if altRoute == False:	
             returnToStart()	
         else:	
             bearings[0] = getBearingToPoint()	
-            alternateRoute(0, -0.4)			
+            alternateRoute(0, 0.4)			
         open_arms()			
         shuffle_back()			
         moveblock = True			

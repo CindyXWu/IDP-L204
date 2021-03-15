@@ -47,7 +47,7 @@ def receivingData():
     try:		
         message=receiver.getData()			
         dataList=struct.unpack("idd",message)	
-        print(dataList[0])			
+        #print(dataList[0])			
         if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these			
             nextTarget = (dataList[1],dataList[2]) #NEED TO TEST THIS< I'M NOT SURE	
             nextTargetIdentified = True	
@@ -83,21 +83,21 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)			
     motor_right.setVelocity(MAX_SPEED)			
 def open_arms():			
-    arm_left.setPosition(0.1)			
-    arm_right.setPosition(-0.1)			
+    arm_left.setPosition(0.25)			
+    arm_right.setPosition(-0.25)			
 def close_arms():			
     arm_left.setPosition(0) 			
     arm_right.setPosition(0)   			
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.4 * MAX_SPEED)			
-    motor_right.setVelocity(0.4 * MAX_SPEED)			
+    motor_left.setVelocity(-0.3 * MAX_SPEED)			
+    motor_right.setVelocity(0.3 * MAX_SPEED)			
 def rotate_CW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(0.4 * MAX_SPEED)			
-    motor_right.setVelocity(-0.4 * MAX_SPEED)			
+    motor_left.setVelocity(0.3 * MAX_SPEED)			
+    motor_right.setVelocity(-0.3 * MAX_SPEED)			
 def shuffle_back():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
@@ -207,38 +207,37 @@ def rotateTheta(theta):
             motor_right.setVelocity(0)			
             break			
     			
-def rotateUntilBearing(target_bearing, initial_bearing):			
-    angle_rotated = 0			
-    motor_left.setPosition(float('inf'))			
-    motor_right.setPosition(float('inf'))			
-    	
-    if target_bearing == 0:	
+def rotateUntilBearing(target_bearing, initial_bearing):	
+    angle_rotated = 0	
+    motor_left.setPosition(float('inf'))	
+    motor_right.setPosition(float('inf'))
+    if target_bearing == 0:
+        rotate_CW()
+        previousbearing = getBearingInDegrees()		
+        while robot.step(TIME_STEP) != -1:     		
+            bearing = getBearingInDegrees()	
+            if bearing<previousbearing:		
+                motor_left.setVelocity(0)		
+                motor_right.setVelocity(0)		
+                break	
+            previousbearing = bearing
+    elif target_bearing > int(initial_bearing):	
         rotate_CW()	
-        previousbearing = getBearingInDegrees()			
-        while robot.step(TIME_STEP) != -1:     			
-            bearing = getBearingInDegrees()		
-            if bearing<previousbearing:			
-                motor_left.setVelocity(0)			
-                motor_right.setVelocity(0)			
-                break		
-            previousbearing = bearing	
-    	
-    elif target_bearing > initial_bearing:			
-        rotate_CW()			
-        while robot.step(TIME_STEP) != -1:     			
-            bearing = getBearingInDegrees()			
-            if bearing >= target_bearing:			
-                motor_left.setVelocity(0)			
-                motor_right.setVelocity(0)			
-                break			
-    else:			
-        rotate_ACW()			
-        while robot.step(TIME_STEP) != -1:			
-            bearing = getBearingInDegrees()			
-            if bearing <= target_bearing:			
-                motor_left.setVelocity(0)			
-                motor_right.setVelocity(0) 			
-                break   			
+        while robot.step(TIME_STEP) != -1:     	
+            bearing = getBearingInDegrees()	
+            if bearing >= target_bearing:	
+                motor_left.setVelocity(0)	
+                motor_right.setVelocity(0)	
+                break	
+    else:	
+        rotate_ACW()	
+        while robot.step(TIME_STEP) != -1:	
+            bearing = getBearingInDegrees()	
+            if bearing <= target_bearing:	
+                motor_left.setVelocity(0)	
+                motor_right.setVelocity(0) 	
+                break   
+                			
 def doScan(theta, initial_bearing):			
     sensorValueScan = [] #currently looks like a 1D list, but will have lists appended to it to make it 2D			
     angle_rotated = 0			
@@ -254,7 +253,7 @@ def doScan(theta, initial_bearing):
         i += 1			
         			
         if (bearing - initial_bearing) >= 0:			
-            angle_rotated = bearing - initial_bearinggit b			
+            angle_rotated = bearing - initial_bearing			
         if bearing - initial_bearing < 0:			
             angle_rotated = bearing + (360 - initial_bearing)			
         if angle_rotated > theta:			
@@ -307,8 +306,10 @@ def checkStartCross(targetxpos, targetzpos, returnTrip = False):
     #print("block x = ", targetxpos)			
     #print("current z = ", current_position[2])			
     #print("block z = ", targetzpos)					
-			
-    for j in range(3, nsamples): #starts at j=3 so a false positive isn't raised at the start			
+    if abs(current_position[0]) < 0.2 and 0.2 < abs(current_position[2]) < 0.6:
+        startval = 10	
+		
+    for j in range(startval, nsamples): #starts at j=startval so a false positive isn't raised at the start			
         xsampledpos = (current_position[0] + ((j/nsamples)*(targetxpos - current_position[0])))			
         zsampledpos = (current_position[2] + ((j/nsamples)*(targetzpos - current_position[2])))	
         #print(xsampledpos, zsampledpos)					
@@ -323,7 +324,7 @@ def checkStartCross(targetxpos, targetzpos, returnTrip = False):
     	
 #======================= Navigation function for going around starting squares =====================	
 def alternateRoute(desiredxpos, desiredzpos):
-    print("doing alternate route")
+    #print("doing alternate route")
     motor_left.setVelocity(0.0)		
     motor_right.setVelocity(0.0)
     xdiff = 1
@@ -363,7 +364,7 @@ def alternateRoute(desiredxpos, desiredzpos):
             rotateUntilBearing(zbearing, getBearingInDegrees())
             move_forwards()  	
             	
-            while robot.step(TIME_STEP) != -1 and abs(zdiff) > 0.1:	       		
+            while robot.step(TIME_STEP) != -1 and abs(zdiff) > 0.2:	       		
                 zdiff = desiredzpos - gps.getValues()[2] - 0.02
             
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
@@ -380,7 +381,7 @@ def alternateRoute(desiredxpos, desiredzpos):
             rotateUntilBearing(xbearing, getBearingInDegrees())
             move_forwards()  	
             	
-            while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.1:	       		
+            while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.2:	       		
                 xdiff = desiredxpos - gps.getValues()[0] - 0.02
               
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
@@ -423,19 +424,14 @@ def getBearingToPoint(x=0, y=0, z=0.4):
     target_bearing = 0.0
     if current_position[2] < initial_position[2]:
         target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)
-        print("condition 1")
     if current_position[2] > initial_position[2]:
         target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)
-        print("condition 2")
     if current_position[2] == initial_position[2] and current_position[0] > initial_position[0]:
         target_bearing = 180.0
-        print("condition 3")
     if current_position[2] == initial_position[2] and current_position[0] < initial_position[0]:
         target_bearing = 0.0
-        print("condition 4")
-    if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:
-        print("condition 5")
-
+    #if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:
+        #print("condition 5")
     return target_bearing	
     	                    	
 #======================= Return to initial position =====================			
@@ -452,8 +448,7 @@ def returnToStart():
           if distance <= 0.2:			
               motor_left.setVelocity(0)			
               motor_right.setVelocity(0)			
-              break			
-          			
+              break					
           if robot.step(TIME_STEP) == 1:			
               break	
               
@@ -482,9 +477,9 @@ while robot.step(TIME_STEP) != -1:
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
     if scanblocks == False and nextTargetIdentified == False:
-        rotateUntilBearing(90,getBearingInDegrees)			
+        #rotateUntilBearing(5,getBearingInDegrees())			
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(175, current_bearing)				
+        sensorValueScan = doScan(160, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			

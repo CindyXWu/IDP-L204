@@ -254,7 +254,7 @@ def doScan(theta, initial_bearing):
         i += 1			
         			
         if (bearing - initial_bearing) >= 0:			
-            angle_rotated = bearing - initial_bearinggit b			
+            angle_rotated = bearing - initial_bearing			
         if bearing - initial_bearing < 0:			
             angle_rotated = bearing + (360 - initial_bearing)			
         if angle_rotated > theta:			

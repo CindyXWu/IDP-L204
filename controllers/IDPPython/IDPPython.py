@@ -61,7 +61,7 @@ def receivingData():
         if dataList[0] == 2:	
             #print("Green is in Happy branch 2")	
             otherRobotLocation = (dataList[1],dataList[2])	
-            nextTargetIdentified = None	
+            nextTargetIdentified = False	
             return otherRobotLocation, nextTargetIdentified  	
     except SystemError:	
         print("Green in error branch")	
@@ -298,7 +298,8 @@ def getBlockData():
 def checkStartCross(targetxpos, targetzpos, returnTrip = False): 			
     			
     nsamples = 20	
-    reroute = False			
+    reroute = False
+    startval = 1			
     			 			
     current_position = gps.getValues()	
     	
@@ -477,9 +478,9 @@ while robot.step(TIME_STEP) != -1:
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
     if scanblocks == False and nextTargetIdentified == False:
-        #rotateUntilBearing(5,getBearingInDegrees())			
+        rotateUntilBearing(0,getBearingInDegrees())			
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(160, current_bearing)				
+        sensorValueScan = doScan(175, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			

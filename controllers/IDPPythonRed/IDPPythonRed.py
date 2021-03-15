@@ -58,9 +58,9 @@ def receivingData():
             #print("Red in Happy branch 1")
             return otherRobotTarget, nextTargetIdentified
         if dataList[0] == 2:
-            print("Red is in Happy branch 2")
+            #print("Red is in Happy branch 2")
             otherRobotLocation = (dataList[1],dataList[2])
-            nextTargetIdentified = None
+            nextTargetIdentified = False
             return otherRobotLocation, nextTargetIdentified  
     except SystemError:
         nextTargetIdentified = False
@@ -290,7 +290,7 @@ def checkStartCross(targetxpos, targetzpos, returnTrip = False):
     		
     nsamples = 20
     reroute = False
-    startvsl = 1		
+    startval = 1		
     			 		
     current_position = gps.getValues()
     
@@ -301,7 +301,7 @@ def checkStartCross(targetxpos, targetzpos, returnTrip = False):
     	
     if abs(current_position[0]) < 0.2 and 0.2 < abs(current_position[2]) < 0.6:
         startval = 10	
-		
+    	
     for j in range(startval, nsamples): #starts at j=startval so a false positive isn't raised at the start		
         xsampledpos = (current_position[0] + ((j/nsamples)*(targetxpos - current_position[0])))		
         zsampledpos = (current_position[2] + ((j/nsamples)*(targetzpos - current_position[2])))
@@ -474,7 +474,7 @@ while robot.step(TIME_STEP) != -1:
     if scanblocks == False and nextTargetIdentified == False:
         rotateUntilBearing(0,getBearingInDegrees())			
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(175, current_bearing)				
+        sensorValueScan = doScan(178, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			

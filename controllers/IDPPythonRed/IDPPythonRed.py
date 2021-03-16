@@ -150,7 +150,10 @@ def shuffle_back_short():
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
-         
+def wait():
+    wait = 0
+    while robot.step(TIME_STEP) != -1 and wait<30:
+        wait += 1   
 #==================================SENSING FUNCTIONS=====================   	
 def getColour():
     #this function only checks if the sensor is returning a high value	
@@ -177,10 +180,9 @@ def getSensorValues():
     #raw value of ultrasonics is in microseconds, divide by 5700 to get dist. in m		
     distances.append(us_r_raw/5700) 
     distances.append(us_l_raw/5700)	
-    	
+
     if ir_raw < 0.45 and ir_raw >= 0.42:	
-        distances.append(1.5)	
-        	
+        distances.append(1.5)		
     if ir_raw < 0.42:	
         distances.append(1.5)		
         	
@@ -631,18 +633,17 @@ while robot.step(TIME_STEP) != -1:
                         #Stopping, checking colour		
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
-                            motor_right.setVelocity(0)			
-                            colour = getColour();
-                            colour = True		
+                            motor_right.setVelocity(0)	
+                            close_arms()
+                            wait()		
+                            colour = getColour();	
                             if colour == False:			
                                 print("Red bot has located a green block")			
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
-                                break			
-                        			
-                            elif colour == True:			
-                                close_arms()			
+                                break					
+                            elif colour == True:					
                                 blockred=True			
                                 print("Red bot has located a red block")	
                                 moveblock = False			
@@ -668,17 +669,16 @@ while robot.step(TIME_STEP) != -1:
                     
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
-                motor_right.setVelocity(0)			
-                colour = getColour();
-                colour = True			
+                motor_right.setVelocity(0)
+                close_arms()
+                wait()			
+                colour = getColour();		
                 if colour == False:			
                     print("Red bot has located a green block")			
                     shuffle_back_short()			
                     scanblocks=False			
-                    wrongBlocks.append(GPSOfBlocks[0])	
-                    			
-                elif colour == True:			
-                    close_arms()			
+                    wrongBlocks.append(GPSOfBlocks[0])			
+                elif colour == True:						
                     blockred=True			
                     print("Red bot has located a red block")			
                     moveblock = False			

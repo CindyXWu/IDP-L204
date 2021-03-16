@@ -31,7 +31,12 @@ light_sensor_r.enable(TIME_STEP)
 compass.enable(TIME_STEP)			
 gps.enable(TIME_STEP)			
 receiver.enable(TIME_STEP)	
-nextTargetIdentified = False	
+nextTargetIdentified = False
+#-------------------------------wait fxn ------------------------------------
+def wait():
+    wait = 0
+    while robot.step(TIME_STEP) != -1 and wait<30:
+        wait = wait + 1	
 #---------------------------Communication Functions---------------------------------------------------------------	
 #0 means wrong colour, 1 means target, 2 means current location	
 def foundRed(gpsLocation):			
@@ -593,11 +598,13 @@ while robot.step(TIME_STEP) != -1:
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
-                            close_arms()	#close the arms in to align the block		
+                            close_arms()	#close the arms in to align the block
+                            wait()		
                             colour = getColour();		
                             if colour == False:			
                                 print("Green bot has located a red block")
-                                open_arms()			
+                                open_arms()
+                                wait()			
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
@@ -627,11 +634,13 @@ while robot.step(TIME_STEP) != -1:
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
                 motor_right.setVelocity(0)
-                close_arms()			
+                close_arms()
+                wait()			
                 colour = getColour();			
                 if colour == False:			
                     print("Green bot has located a red block")
-                    open_arms()			
+                    open_arms()
+                    wait()			
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])	
@@ -738,11 +747,13 @@ while robot.step(TIME_STEP) != -1:
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
-                            close_arms()			
+                            close_arms()
+                            wait()			
                             colour = getColour();		
                             if colour == False:			
                                 print("Green bot has located a red block")
-                                open_arms()			
+                                open_arms()
+                                wait()			
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
@@ -768,11 +779,13 @@ while robot.step(TIME_STEP) != -1:
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
                 motor_right.setVelocity(0)
-                close_arms()			
+                close_arms()
+                wait()			
                 colour = getColour();			
                 if colour == False:			
                     print("Green bot has located a red block")
-                    open_arms()			
+                    open_arms()
+                    wait()			
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])	

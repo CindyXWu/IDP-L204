@@ -1,7 +1,6 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
   basicTimeStep 8
-  FPS 15
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
@@ -106,22 +105,22 @@ TexturedBackgroundLight {
   texture "empty_office"
 }
 target {
-  translation 0.47 0.03 0.51
+  translation 0.761072 0.03 0.0533886
 }
 target {
-  translation -0.475433 0.03 -0.0860822
+  translation 0.81756 0.03 -0.75967
   name "target(4)"
 }
 target {
-  translation 0.536346 0.03 -0.768076
+  translation -0.677709 0.03 0.0446732
   name "target(2)"
 }
 target {
-  translation -0.93 0.03 0.58
+  translation -0.0412427 0.03 0.0469184
   name "target(3)"
 }
 target {
-  translation 0.929502 0.03 0.457514
+  translation 0.955777 0.03 0.883696
   colour 0 1 0
   name "target(6)"
 }
@@ -131,12 +130,12 @@ target {
   name "target(7)"
 }
 target {
-  translation -0.774396 0.03 -0.75856
+  translation -0.0709858 0.03 0.8055
   colour 0 1 0
   name "target(1)"
 }
 target {
-  translation -0.22 0.03 0.8
+  translation -0.357798 0.03 -0.654971
   colour 0 1 0
   name "target(5)"
 }

@@ -219,7 +219,7 @@ def rotateTheta(theta):
     while robot.step(TIME_STEP) != -1:			
         bearing = getBearingInDegrees()  			
         #Get bearing of block from where I am 			
-        if (bearing - initial_bearing) >= 0:    #If i'm not pointing at block, angle to rotated is different			
+        if (bearing - initial_bearing) >= -0.01:    #If i'm not pointing at block, angle to rotated is different			
             angle_rotated = bearing - initial_bearing			
         else: 			
             angle_rotated = bearing - initial_bearing + 360			
@@ -232,14 +232,14 @@ def rotateUntilBearing(target_bearing, initial_bearing):
     angle_rotated = 0	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))
-    print("target bearing", target_bearing)
-    print("initial bearing", initial_bearing)
+    #print("target bearing", target_bearing)
+    #print("initial bearing", initial_bearing)
     if target_bearing == 0:
         rotate_CW()
         previousbearing = getBearingInDegrees()		
         while robot.step(TIME_STEP) != -1:     		
             bearing = getBearingInDegrees()	
-            if bearing<previousbearing:		
+            if bearing<previousbearing - 0.01:		
                 motor_left.setVelocity(0)		
                 motor_right.setVelocity(0)		
                 break	
@@ -248,7 +248,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
         rotate_CW()	
         while robot.step(TIME_STEP) != -1:     	
             bearing = getBearingInDegrees()	
-            if bearing >= target_bearing:	
+            if bearing >= target_bearing - 0.01:	
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0)	
                 break	
@@ -256,7 +256,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
         rotate_ACW()	
         while robot.step(TIME_STEP) != -1:	
             bearing = getBearingInDegrees()	
-            if bearing <= target_bearing:	
+            if bearing <= target_bearing + 0.01:	
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0) 	
                 break   
@@ -276,9 +276,9 @@ def doScan(theta, initial_bearing):
         			         			
         i += 1			
         			
-        if (bearing - initial_bearing) >= 0:			
+        if (bearing - initial_bearing) >= -0.01:			
             angle_rotated = bearing - initial_bearing			
-        if bearing - initial_bearing < 0:			
+        if bearing - initial_bearing < -0.01:			
             angle_rotated = bearing + (360 - initial_bearing)			
         if angle_rotated > theta:			
             motor_left.setVelocity(0)			
@@ -304,7 +304,7 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :			
         alpha = sensorValueScan[i][2];			
     #Conditions for blocks to be picked out: large jump from previous value		
-        if (sensorValueScan[i - 1][2] - alpha) > 0.11:			
+        if (sensorValueScan[i - 1][2] - alpha) > 0.12:			
             blockBearings.append(sensorValueScan[i][3])			
             blockDistances.append(alpha)			
     for i in range(len(blockBearings)):			
@@ -725,6 +725,7 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
+            print("GREEN REALISES OTHER ROBOT FINISHED")
         else:
             j += 1
             if j == 100:
@@ -814,7 +815,7 @@ while robot.step(TIME_STEP) != -1:
                 
                 #If we don't need to reroute, run Cindy's orginal code as normal	
                 if checkgoround == False and firstHalf == False:
-                    print("normal route")	
+                    #print("normal route")	
                     rotateUntilBearing(getBearingToPoint(GPSOfBlocks[j][0], 0, GPSOfBlocks[j][1]), getBearingInDegrees())		
                     move_forwards()			
                     open_arms()   		
@@ -834,7 +835,7 @@ while robot.step(TIME_STEP) != -1:
                             
                 #Rerouting code version to get to block        
                 if checkgoround == True and firstHalf == False:
-                    print("altroute")       	
+                    #print("altroute")       	
                     x,y = GPSOfBlocks[j][0], GPSOfBlocks[j][1]	
                         
                     alternateRoute(x, y)	
@@ -872,7 +873,7 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 500:			
+    if i == 5000:			
         returnToStart()
         print("Exiting due to timeout")			
         break

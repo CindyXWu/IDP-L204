@@ -36,17 +36,24 @@ nextTargetIdentified = False
 #0 means wrong colour, 1 means target, 2 means current location	
 def foundRed(gpsLocation):			
     message = struct.pack("idd",0,gpsLocation[0],gpsLocation[1])			
-    emitter.send(message)	
+    emitter.send(message)
+    #print("GREEN SENDING FOUND RED MESSAGE: ", gpsLocation[0], gpsLocation[1])	
 def target(gpsLocation):			
     message = struct.pack("idd",1,gpsLocation[0],gpsLocation[1])			
-    emitter.send(message)	
+    emitter.send(message)
+    #print("GREEN SENDING TARGET LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])	
 def sendCurrentLocation(gpsLocation):	
     message = struct.pack("idd",2,gpsLocation[0],gpsLocation[1])	
-    emitter.send(message)			
+    emitter.send(message)
+    #print("GREEN SENDING CURRENT LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])			
 def receivingData():		
-    try:		
-        message=receiver.getData()			
-        dataList=struct.unpack("idd",message)	
+    try:
+        receiver.nextPacket()	#this function is not to be forgotten		
+        message=receiver.getData()	
+        dataList=struct.unpack("idd",message)
+        #print("GREEN RECEIVED DATA ", dataList)
+        #print("GREEN QUEUE LENGTH: ", receiver.getQueueLength())
+        
         #print(dataList[0])			
         if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these			
             nextTarget = (dataList[1],dataList[2]) #NEED TO TEST THIS< I'M NOT SURE	
@@ -55,7 +62,7 @@ def receivingData():
             return nextTarget, nextTargetIdentified	
         if dataList[0] == 1:	
             otherRobotTarget = (dataList[1],dataList[2])	
-            nextTragetIdentified = False	
+            nextTargetIdentified = False	
             #print("Green in Happy branch 1")	
             return otherRobotTarget, nextTargetIdentified	
         if dataList[0] == 2:	
@@ -64,7 +71,7 @@ def receivingData():
             nextTargetIdentified = False	
             return otherRobotLocation, nextTargetIdentified  	
     except SystemError:	
-        print("Green in error branch")	
+        #print("Green in error branch")	
         nextTargetIdentified = False	
         other = [0,0]	
         return other, nextTargetIdentified	
@@ -434,7 +441,26 @@ def getBearingToPoint(x=0, y=0, z=-0.4):
     #if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:
         #print("condition 5")
     return target_bearing	
-    	                    	
+
+def getBearingUpwards(x,z):
+    z += 2
+    initial_position = [x,0,z]
+    current_position = [x,0,(z-2)]
+    target_bearing = 0.0			
+    if current_position[2] < initial_position[2]:			
+        target_bearing = 90.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)			
+        #print("condition 1") 						
+    if current_position[2] > initial_position[2]:			
+        target_bearing = 270.0 - (math.atan((current_position[0] - initial_position[0]) / (current_position[2] - initial_position[2])) * 180.0 / math.pi)			
+        #print("condition 2")				
+    if current_position[2] == initial_position[2] and current_position[0] > initial_position[0]:			
+        target_bearing = 180.0			
+        #print("condition 3")			
+    if current_position[2] == initial_position[2] and current_position[0] < initial_position[0]:			
+        target_bearing = 0.0			
+        #print("condition 4")
+    return target_bearing   
+
 #======================= Return to initial position =====================			
 def returnToStart():			
     			
@@ -465,8 +491,8 @@ wrongBlocks = []
 	
 while robot.step(TIME_STEP) != -1:			
     	
-    sendCurrentLocation(gps.getValues())		
-    receivedCoordinate, nextTargetIdentified = receivingData()	
+    #sendCurrentLocation(gps.getValues())		
+    #receivedCoordinate, nextTargetIdentified = receivingData()	
     	
     #if nextTargetIdentified == None and len(receivedCoordinate)!=0:	
         #coords = gps.getValues()	
@@ -477,9 +503,12 @@ while robot.step(TIME_STEP) != -1:
 
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
-    if scanblocks == False and nextTargetIdentified == False:			
+    current_position = gps.getValues()
+    bearing = getBearingUpwards(current_position[0],current_position[2])
+    rotateUntilBearing(bearing,getBearingInDegrees())
+    if scanblocks == False:			
         current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(355, current_bearing)				
+        sensorValueScan = doScan(180, current_bearing)				
         scanblocks = True		
 
     #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			
@@ -550,7 +579,8 @@ while robot.step(TIME_STEP) != -1:
                     if distance < 0.1:			
                         motor_left.setVelocity(0)			
                         motor_right.setVelocity(0)			
-                        colour = getColour();			
+                        colour = getColour();
+                        colour = True			
                         if colour == False:			
                             print("Green bot has located a red block")			
                             shuffle_back_short()			
@@ -579,7 +609,8 @@ while robot.step(TIME_STEP) != -1:
             alternateRoute(x, y)	
             motor_left.setVelocity(0)			
             motor_right.setVelocity(0)			
-            colour = getColour();			
+            colour = getColour();
+            colour = True			
             if colour == False:			
                 print("Green bot has located a red block")			
                 shuffle_back_short()			

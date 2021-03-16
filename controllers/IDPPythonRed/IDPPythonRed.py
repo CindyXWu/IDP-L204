@@ -506,7 +506,7 @@ def returnToStart():
           if robot.step(TIME_STEP) == 1:	
               break	
               
-def moveToPoint(xcoord = 0.0, zcoord = 0.5): # use (0, (0), -0.5)
+def moveToPoint(xcoord = 0.0, zcoord = 0.7): # use (0, (0), -0.5)
     target_bearing = getBearingToPoint(xcoord, 0, zcoord)						
     initial_bearing = getBearingInDegrees()			
     rotateUntilBearing(target_bearing, initial_bearing)			
@@ -517,8 +517,6 @@ def moveToPoint(xcoord = 0.0, zcoord = 0.5): # use (0, (0), -0.5)
               motor_left.setVelocity(0)			
               motor_right.setVelocity(0)			
               break					
-          if robot.step(TIME_STEP) == 1:			
-              break	
 
 #=================================MAIN CODE=====================================================			
 #robot instance already created and devices enabled with timestep			
@@ -719,11 +717,11 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            otherRobotFinished = True
             scanblocks = False						
             moveblock = False			
             blockred = False 				
             gotallblock = False
+            movedtopoint = False
         else:
             j += 1
             if j == 100:
@@ -731,8 +729,9 @@ while robot.step(TIME_STEP) != -1:
                 
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
-        moveToPoint()
-        #SOMETHING HERE TO SWITCH SIDES WITHOUT COLLIDING: TOM WILL PUT<<======================
+        if movedtopoint == False:
+            moveToPoint()
+            movedtopoint = True
         
         if scanblocks == False:			
             current_bearing = getBearingInDegrees()			
@@ -858,7 +857,6 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 500:
-        print("Exiting due to timeout")			
-        returnToStart()			
+    if i == 5000:
+        print("Exiting due to timeout")						
         break

@@ -55,7 +55,7 @@ receiver.enable(TIME_STEP)
     #print("I said I finished ok")
     
 #SEND COORDINATES OF BLOCKS OF WRONG COLOUR TO OTHER BOT
-def sendFinished(wrongBlocks):
+def sendFinished():
     message = struct.pack("i",1)		
     emitter.send(message)
 
@@ -111,8 +111,8 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)			
     motor_right.setVelocity(MAX_SPEED)			
 def open_arms():			
-    arm_left.setPosition(0.2)			
-    arm_right.setPosition(-0.2)			
+    arm_left.setPosition(0.25)			
+    arm_right.setPosition(-0.25)			
 def close_arms():			
     arm_left.setPosition(-0.15) 			
     arm_right.setPosition(0.15)   			
@@ -511,7 +511,7 @@ def returnToStart():
           if robot.step(TIME_STEP) == 1:			
               break
               
-def moveToPoint(xcoord = 0.0, zcoord = -0.5): # use (0, (0), -0.5)
+def moveToPoint(xcoord = 0.0, zcoord = -0.7): # use (0, (0), -0.5)
     print("Green has entered moveToPoint")
     target_bearing = getBearingToPoint(xcoord, 0, zcoord)						
     initial_bearing = getBearingInDegrees()			
@@ -630,7 +630,7 @@ while robot.step(TIME_STEP) != -1:
             try:
                 checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
             except IndexError:
-                sendFinished(wrongBlocks)
+                sendFinished()
                 firstHalf = False
             
             #If we don't need to reroute, run Cindy's orginal code as normal	
@@ -722,7 +722,8 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            scanblocks = False						
+            scanblocks = False
+            movedtopoint = False						
             moveblock = False			
             blockgreen = False 				
             gotallblock = False	
@@ -732,8 +733,9 @@ while robot.step(TIME_STEP) != -1:
                 break
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
-        moveToPoint()
-        #SOMETHING HERE TO SWITCH SIDES WITHOUT COLLIDING: TOM WILL PUT<<======================
+        if movedtopoint == False:    
+            moveToPoint()
+            movedtopoint = True
         
         if scanblocks == False:			
             current_bearing = getBearingInDegrees()			
@@ -741,7 +743,7 @@ while robot.step(TIME_STEP) != -1:
             scanblocks = True
         
         #GETTING BLOCK DATA		
-        if scanblocks==True and gotblock == False:	
+        if scanblocks==True and gotallblock == False:	
     
             #if nextTargetIdentified == True:
             	#nextTargetIdentified = False
@@ -861,7 +863,7 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 500:			
+    if i == 5000:			
         returnToStart()
         print("Exiting due to timeout")			
         break

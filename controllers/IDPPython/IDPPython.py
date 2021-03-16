@@ -513,7 +513,22 @@ def returnToStart():
               motor_right.setVelocity(0)			
               break					
           if robot.step(TIME_STEP) == 1:			
-              break	
+              break
+              
+def moveToPoint(xcoord = 0.0, zcoord = -0.5): # use (0, (0), -0.5)
+    print("Green has entered moveToPoint")
+    target_bearing = getBearingToPoint(xcoord, 0, zcoord)						
+    initial_bearing = getBearingInDegrees()			
+    rotateUntilBearing(target_bearing, initial_bearing)			
+    move_forwards()			
+    while robot.step(TIME_STEP) != -1:			
+          distance = math.sqrt((xcoord - gps.getValues()[0])**2 + (zcoord - gps.getValues()[2])**2);			
+          if distance <= 0.2:			
+              motor_left.setVelocity(0)			
+              motor_right.setVelocity(0)			
+              break					
+          if robot.step(TIME_STEP) == 1:			
+              break		
               
 #=================================MAIN CODE=====================================================			
 #robot instance already created and devices enabled with timestep			
@@ -706,7 +721,6 @@ while robot.step(TIME_STEP) != -1:
     
 #=============SWITCH OVER AND START SECOND HALF=======================================
 #NOTE: TOM WILL WRITE FUNCTION TO MAKE ROBOTS SWITCH HALVES WITHOUT BUMPING INTO EACH OTHER
-    
     #If a robot is finished and has not yet got data from the robot, it will sit and 
     #attempt to receive data. This loop ends once all data is passed on.#
     j = 0
@@ -720,6 +734,7 @@ while robot.step(TIME_STEP) != -1:
     if firstHalf == False and otherRobotFinished == True:
         
         #SOMETHING HERE TO SWITCH SIDES WITHOUT COLLIDING: TOM WILL PUT<<======================
+        moveToPoint()
         
         for i in range(len(rightBlocks)):	
             bearings = getBearingToPoint(rightBlocks[i][0],0,rightBlocks[i][2])

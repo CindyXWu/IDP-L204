@@ -110,8 +110,8 @@ def open_arms():
     arm_left.setPosition(0.35)	
     arm_right.setPosition(-0.35)	
 def close_arms():	
-    arm_left.setPosition(-0.2) 	
-    arm_right.setPosition(0.2)   	
+    arm_left.setPosition(-0.21) 	
+    arm_right.setPosition(0.21)   	
 def rotate_ACW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
@@ -130,7 +130,7 @@ def shuffle_back():
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
-      if i==400:	
+      if i==250:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
@@ -142,7 +142,7 @@ def shuffle_back_short():
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
-      if i==180:	
+      if i==100:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
@@ -295,7 +295,7 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :	
         alpha = sensorValueScan[i][2];	
     #Conditions for blocks to be picked out:	large jump between previous value	
-        if (sensorValueScan[i - 1][2] - alpha) > 0.105:	
+        if (sensorValueScan[i - 1][2] - alpha) > 0.09:	
             blockBearings.append(sensorValueScan[i][3])	
             blockDistances.append(alpha)
             print("BEARING: ", sensorValueScan[i][3])
@@ -378,7 +378,8 @@ def alternateRoute(desiredxpos, desiredzpos):
     if twopointturn == False:
         if zfirst == True:
             rotateUntilBearing(zbearing, getBearingInDegrees())
-            move_forwards()  	
+            move_forwards() 
+            close_arms() 	
             	
             while robot.step(TIME_STEP) != -1 and abs(zdiff) > 0.2:	       		
                 zdiff = desiredzpos - gps.getValues()[2] - 0.02
@@ -386,9 +387,7 @@ def alternateRoute(desiredxpos, desiredzpos):
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
             rotateUntilBearing(bearingtopoint, getBearingInDegrees())
             move_forwards()
-            close_arms()
-
-                
+        
             while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
                 xdiff = desiredxpos - gps.getValues()[0]		
                 zdiff = desiredzpos - gps.getValues()[2]		
@@ -399,6 +398,7 @@ def alternateRoute(desiredxpos, desiredzpos):
         else:
             rotateUntilBearing(xbearing, getBearingInDegrees())
             move_forwards()  	
+            close_arms()
             	
             while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.2:	       		
                 xdiff = desiredxpos - gps.getValues()[0] - 0.02
@@ -406,7 +406,6 @@ def alternateRoute(desiredxpos, desiredzpos):
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
             rotateUntilBearing(bearingtopoint, getBearingInDegrees())
             move_forwards()
-            close_arms()
     
             while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
                 xdiff = desiredxpos - gps.getValues()[0]		
@@ -418,6 +417,7 @@ def alternateRoute(desiredxpos, desiredzpos):
     else:
         rotateUntilBearing(180, getBearingInDegrees())
         move_forwards()
+        close_arms()
         
         while robot.step(TIME_STEP) != -1 and abs(xdiff) > 0.15:	       		
             xdiff = -0.6 - gps.getValues()[0] - 0.02
@@ -431,7 +431,6 @@ def alternateRoute(desiredxpos, desiredzpos):
         bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
         rotateUntilBearing(bearingtopoint, getBearingInDegrees())
         move_forwards()
-        close_arms()
     
         while robot.step(TIME_STEP) != -1 and distance > 0.07:	       		
             xdiff = desiredxpos - gps.getValues()[0]		
@@ -578,7 +577,7 @@ while robot.step(TIME_STEP) != -1:
                 
             #if nextTargetIdentified == False:	
             GPSOfBlocks, bearings, distances = getBlockData()	
-            indicesToRemoveForCollected = []	
+            indicesToRemove = []	
             indicesToRemoveForWrongHalf = []	
 
 #=====================CLEANING BLOCK DATA============================================
@@ -586,13 +585,16 @@ while robot.step(TIME_STEP) != -1:
             #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
             for i in range(len(GPSOfBlocks)):	
                 if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
-                    indicesToRemoveForCollected.append(i)	
-                
+                    indicesToRemove.append(i)	
+            
+            for i in range(len(GPSOfBlocks)):
+                if abs(GPSOfBlocks[i][0]) > 1.12 or abs(GPSOfBlocks[i][1]) > 1.12:
+                    indicesToRemove.append(i)
             #It is very important that we delete the higher index first, so that 	
             #by deleting indices one by one, we are not affecting remaining deletions	
-            #And you know that indicesToRemoveForCollected has indices in ascending order	
+            #And you know that indicesToRemove has indices in ascending order	
             #So iterate through backwards	
-            for index in sorted(indicesToRemoveForCollected, reverse=True):		
+            for index in sorted(indicesToRemove, reverse=True):		
                 GPSOfBlocks.pop(index)	
                 bearings.pop(index)	
                 distances.pop(index)		
@@ -761,7 +763,7 @@ while robot.step(TIME_STEP) != -1:
                 
             #if nextTargetIdentified == False:	
             GPSOfBlocks, bearings, distances = getBlockData()	
-            indicesToRemoveForCollected = []	
+            indicesToRemove = []	
             indicesToRemoveForWrongHalf = []	
 
 #=====================CLEANING BLOCK DATA============================================
@@ -771,13 +773,17 @@ while robot.step(TIME_STEP) != -1:
             #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
             for i in range(len(GPSOfBlocks)):	
                 if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
-                    indicesToRemoveForCollected.append(i)	
-                
+                    indicesToRemove.append(i)	
+                    
+            for i in range(len(GPSOfBlocks)):
+                if abs(GPSOfBlocks[i][0]) > 1.12 or abs(GPSOfBlocks[i][1]) > 1.12:
+                    indicesToRemove.append(i) 
+                      
             #It is very important that we delete the higher index first, so that 	
             #by deleting indices one by one, we are not affecting remaining deletions	
-            #And you know that indicesToRemoveForCollected has indices in ascending order	
+            #And you know that indicesToRemove has indices in ascending order	
             #So iterate through backwards	
-            for index in sorted(indicesToRemoveForCollected, reverse=True):		
+            for index in sorted(indicesToRemove, reverse=True):		
                 GPSOfBlocks.pop(index)	
                 bearings.pop(index)	
                 distances.pop(index)		
@@ -881,12 +887,12 @@ while robot.step(TIME_STEP) != -1:
         print("Red finished")
         break
 
-    i += 1				
+    #i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 5000:			
-        returnToStart()
-        print("Exiting due to timeout")			
-        break
+    #if i == 5000:			
+        #returnToStart()
+        #print("Exiting due to timeout")			
+        #break
         
 #testing git - Tom

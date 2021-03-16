@@ -57,15 +57,22 @@ receiver.enable(TIME_STEP)
 #SEND COORDINATES OF BLOCKS OF WRONG COLOUR TO OTHER BOT
 def sendFinished(wrongBlocks):
     for index in wrongBlocks:	
+        print("Green trying to send block: ",index[0],index[1])
         message = struct.pack("idd",1,index[0],index[1])			
         emitter.send(message)
+        if robot.step(TIME_STEP) == -1:
+            break
 
 #RECEIVES COORDINATES FOR ONE BLOCK
 def receivingData():		
-    try:
-        receiver.nextPacket()	#this function is not to be forgotten		
-        message=receiver.getData()	 #gets whatever is in receiver
-        dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+    try:	
+        while len(receiver.getQueueLength()) != 0:
+            message=receiver.getData()
+            print("Red received message from green")		
+            dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+            rightBlocks.append([dataList[1],dataList[2]])
+            receiver.nextPacket()
+        return 1    
         #idd means first number followed by two decimals - either 0, 1, 2, or 3
         #print("GREEN RECEIVED DATA ", dataList)
         #print("GREEN QUEUE LENGTH: ", receiver.getQueueLength())
@@ -92,14 +99,11 @@ def receivingData():
             #return otherRobotFinished
         
         #blockCoord IS JUST Z AND X VALUES OF ONE BLOCK
-        blockCoord = [dataList[1],	dataList[2]]
-        return blockCoord
         
-    except SystemError:	
+    except:	
         #print("Green in error branch")	
         #nextTargetIdentified = False	
-        other = 0
-        return other
+        return 0
         		
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):	
     if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:	
@@ -306,7 +310,7 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :			
         alpha = sensorValueScan[i][2];			
     #Conditions for blocks to be picked out: large jump from previous value		
-        if (sensorValueScan[i - 1][2] - alpha) > 0.15:			
+        if (sensorValueScan[i - 1][2] - alpha) > 0.1:			
             blockBearings.append(sensorValueScan[i][3])			
             blockDistances.append(alpha)			
     for i in range(len(blockBearings)):			
@@ -706,24 +710,19 @@ while robot.step(TIME_STEP) != -1:
 #NOTE: TOM WILL WRITE FUNCTION TO MAKE ROBOTS SWITCH HALVES WITHOUT BUMPING INTO EACH OTHER
     
     #If a robot is finished and has not yet got data from the robot, it will sit and 
-    #attempt to receive data. This loop ends once all data is passed on.
+    #attempt to receive data. This loop ends once all data is passed on.#
+    j = 0
     while firstHalf == False and otherRobotFinished == False: 
-        try: 
-            rightBlocks[0] = receivingData()
-            
-            #If receivingData() is returning 0, means nothing is being sent
-            if rightBlocks[0] != 0:
-                for i in range(len(numberOfBlocksSent)-1):
-                    rightBlocks[i+1] = receivingData()
-                    otherRobotFinished = True
-                    break
-                    
-            #If nothing is being sent, pass and try again until something is received
+        val = receivingData()
+        #If receivingData() is returning 0, means nothing is being sent
+        if val == 0:
+            j+=1
+            if j==100:
+                break
             else:
                 pass
-        #Basically the same as the else condition above, but just in case
-        except IndexError:
-            pass
+        if val == 1:
+            break  
         
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:

@@ -111,11 +111,11 @@ def move_forwards():
     motor_left.setVelocity(MAX_SPEED)			
     motor_right.setVelocity(MAX_SPEED)			
 def open_arms():			
-    arm_left.setPosition(0.2)			
-    arm_right.setPosition(-0.2)			
+    arm_left.setPosition(0.35)			
+    arm_right.setPosition(-0.35)			
 def close_arms():			
-    arm_left.setPosition(-0.15) 			
-    arm_right.setPosition(0.15)   			
+    arm_left.setPosition(-0.2) 			
+    arm_right.setPosition(0.2)   			
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
@@ -392,13 +392,15 @@ def alternateRoute(desiredxpos, desiredzpos):
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
             rotateUntilBearing(bearingtopoint, getBearingInDegrees())
             move_forwards()
-            open_arms()
+            close_arms()
 
                 
             while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
                 xdiff = desiredxpos - gps.getValues()[0]		
                 zdiff = desiredzpos - gps.getValues()[2]		
                 distance = math.sqrt(xdiff**2 + zdiff**2)
+                if distance < 0.35:
+                    open_arms()
         
         else:
             rotateUntilBearing(xbearing, getBearingInDegrees())
@@ -410,12 +412,14 @@ def alternateRoute(desiredxpos, desiredzpos):
             bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
             rotateUntilBearing(bearingtopoint, getBearingInDegrees())
             move_forwards()
-            open_arms()
+            close_arms()
     
             while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
                 xdiff = desiredxpos - gps.getValues()[0]		
                 zdiff = desiredzpos - gps.getValues()[2]		
                 distance = math.sqrt(xdiff**2 + zdiff**2)
+                if distance < 0.35:
+                    open_arms()
             
     else:
         rotateUntilBearing(180, getBearingInDegrees())
@@ -433,12 +437,14 @@ def alternateRoute(desiredxpos, desiredzpos):
         bearingtopoint = getBearingToPoint(desiredxpos, 0, desiredzpos)  
         rotateUntilBearing(bearingtopoint, getBearingInDegrees())
         move_forwards()
-        open_arms()
+        close_arms()
     
         while robot.step(TIME_STEP) != -1 and distance > 0.07:	       		
             xdiff = desiredxpos - gps.getValues()[0]		
             zdiff = desiredzpos - gps.getValues()[2]		
             distance = math.sqrt(xdiff**2 + zdiff**2)
+            if distance < 0.35:
+                open_arms()            
             
 #Gets a bearing when given a position  
 #DO NOT CHANGE THE FUNCTION BASIC ARGUMENTS, -0.4 IS VERY IMPORTANT          
@@ -641,13 +647,16 @@ while robot.step(TIME_STEP) != -1:
             if checkgoround == False and firstHalf == True:	
                 rotateUntilBearing(bearings[0], getBearingInDegrees())			
                 move_forwards()	
-                open_arms()		  		
+                close_arms()		  		
                 		
                 while robot.step(TIME_STEP) != -1:
                     try:	       			
                         xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]			
                         zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]			
                         distance = math.sqrt(xdiff**2 + zdiff**2)		
+                        
+                        if distance < 0.35:
+                            open_arms()
                         		
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
@@ -818,12 +827,15 @@ while robot.step(TIME_STEP) != -1:
                     #print("normal route")	
                     rotateUntilBearing(getBearingToPoint(GPSOfBlocks[j][0], 0, GPSOfBlocks[j][1]), getBearingInDegrees())		
                     move_forwards()			
-                    open_arms()   		
+                    close_arms()   		
                     		
                     while robot.step(TIME_STEP) != -1:	       			
                         xdiff = GPSOfBlocks[j][0] - gps.getValues()[0]			
                         zdiff = GPSOfBlocks[j][1] - gps.getValues()[2]			
-                        distance = math.sqrt(xdiff**2 + zdiff**2)		
+                        distance = math.sqrt(xdiff**2 + zdiff**2)	
+                        
+                        if distance < 0.35:
+                            open_arms()	
 	
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			

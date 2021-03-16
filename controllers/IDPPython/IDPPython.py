@@ -65,14 +65,15 @@ def sendFinished(wrongBlocks):
 
 #RECEIVES COORDINATES FOR ONE BLOCK
 def receivingData():		
-    try:	
-        while len(receiver.getQueueLength()) != 0:
-            message=receiver.getData()
-            print("Red received message from green")		
-            dataList=struct.unpack("idd",message) #array of everything that was sent in packet
-            rightBlocks.append([dataList[1],dataList[2]])
-            receiver.nextPacket()
-        return 1    
+    while receiver.getQueueLength() != 0:
+        message=receiver.getData()		
+        dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+        print("Green received block from red at: ",dataList[1],dataList[2])
+        rightBlocks.append([dataList[1],dataList[2]]) 
+        receiver.nextPacket()  
+    if len(rightBlocks) != 0:
+        print(rightBlocks)
+        otherRobotFinished = True
         #idd means first number followed by two decimals - either 0, 1, 2, or 3
         #print("GREEN RECEIVED DATA ", dataList)
         #print("GREEN QUEUE LENGTH: ", receiver.getQueueLength())
@@ -99,11 +100,6 @@ def receivingData():
             #return otherRobotFinished
         
         #blockCoord IS JUST Z AND X VALUES OF ONE BLOCK
-        
-    except:	
-        #print("Green in error branch")	
-        #nextTargetIdentified = False	
-        return 0
         		
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):	
     if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:	
@@ -399,6 +395,7 @@ def alternateRoute(desiredxpos, desiredzpos):
             rotateUntilBearing(bearingtopoint, getBearingInDegrees())
             move_forwards()
             open_arms()
+
                 
             while robot.step(TIME_STEP) != -1 and distance > 0.1:	       		
                 xdiff = desiredxpos - gps.getValues()[0]		
@@ -628,8 +625,7 @@ while robot.step(TIME_STEP) != -1:
             #If we don't need to reroute, run Cindy's orginal code as normal	
             if checkgoround == False and firstHalf == True:	
                 rotateUntilBearing(bearings[0], getBearingInDegrees())			
-                move_forwards()			
-                open_arms()   		
+                move_forwards()			  		
                 		
                 while robot.step(TIME_STEP) != -1:
                     try:	       			
@@ -637,6 +633,8 @@ while robot.step(TIME_STEP) != -1:
                         zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]			
                         distance = math.sqrt(xdiff**2 + zdiff**2)		
                         
+                        if distance < 0.2:
+                            open_arms()
                         #Stopping, checking colour		
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
@@ -712,17 +710,11 @@ while robot.step(TIME_STEP) != -1:
     #If a robot is finished and has not yet got data from the robot, it will sit and 
     #attempt to receive data. This loop ends once all data is passed on.#
     j = 0
-    while firstHalf == False and otherRobotFinished == False: 
-        val = receivingData()
-        #If receivingData() is returning 0, means nothing is being sent
-        if val == 0:
-            j+=1
-            if j==100:
-                break
-            else:
-                pass
-        if val == 1:
-            break  
+    while firstHalf == False and otherRobotFinished == False and len(rightBlocks) == 0: 
+        receivingData()
+        j += 1
+        if j == 100:
+            break
         
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
@@ -796,8 +788,9 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 200:			
-        returnToStart()			
+    if i == 500:			
+        returnToStart()
+        print("Exiting due to timeout")			
         break
         
 #testing git - Tom

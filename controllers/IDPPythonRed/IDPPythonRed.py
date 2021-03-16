@@ -55,29 +55,30 @@ receiver.enable(TIME_STEP)
 #SEND COORDINATES OF BLOCKS OF WRONG COLOUR TO OTHER BOT
 def sendFinished(wrongBlocks):
     for index in wrongBlocks:
-        print("Red trying to send block: ", index[0],index[1])	
+        print("Red trying to send block: ",index[0],index[1])	
         message = struct.pack("idd",1,index[0],index[1])			
         emitter.send(message)
         if robot.step(TIME_STEP) == -1:
             break
         
 #RECEIVES COORDINATES FOR ONE BLOCK 
-def receivingData():	
-    try:	
-        while len(receiver.getQueueLength()) != 0:
-            message=receiver.getData()
-            print("Red received message from green")		
-            dataList=struct.unpack("idd",message) #array of everything that was sent in packet
-            rightBlocks.append([dataList[1],dataList[2]])
-            receiver.nextPacket()
-        return 1    
+def receivingData():		
+    while receiver.getQueueLength() != 0:
+        message=receiver.getData()	
+        dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+        rightBlocks.append([dataList[1],dataList[2]])
+        receiver.nextPacket()  
+        print("Red received block from green at: ",dataList[1],dataList[2]) 
+    if len(rightBlocks) != 0:
+        print(rightBlocks)
+        otherRobotFinished = True
         #print("RED RECEIVED DATA ", dataList)
         #print("RED QUEUE LENGTH: ", receiver.getQueueLength())
         
         #THE BELOW COMMENTED OUT CODE IS A RELIC OF TESTING
         #print(dataList[0])		
-        #if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these		
-            #nextTarget = (dataList[1],dataList[2]) #NEED TO TEST THIS< I'M NOT SURE
+        #if dataList[0] == 0: 		
+            #nextTarget = (dataList[1],dataList[2])
             #nextTargetIdentified = True
             #print("Red in happy branch 0")
             #return nextTarget, nextTargetIdentified
@@ -96,10 +97,6 @@ def receivingData():
             #return otherRobotFinished
             
     #blockCoord IS JUST Z AND X VALUES OF ONE BLOCK
-    
-    except:
-        return 0
-        #print("Red in Error branch")
         
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
     if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:
@@ -524,7 +521,8 @@ moveblock = False
 blockred = False 			
 wrongBlocks = []
 rightBlocks = []
-firstHalf = True	
+firstHalf = True
+finishedSecondHalf = False	
 otherRobotFinished = False		
 	
 while robot.step(TIME_STEP) != -1:			
@@ -710,24 +708,18 @@ while robot.step(TIME_STEP) != -1:
     #If a robot is finished and has not yet got data from the robot, it will sit and 
     #attempt to receive data. This loop ends once all data is passed on.#
     j = 0
-    while firstHalf == False and otherRobotFinished == False:  
-        val = receivingData()
-        #If receivingData() is returning 0, means nothing is being sent
-        if val == 0:
-            j+=1
-            if j==100:
-                break
-            else:
-                pass
-        if val == 1:
-            break   
+    while firstHalf == False and otherRobotFinished == False and len(rightBlocks) == 0: 
+        receivingData()
+        j += 1
+        if j == 100:
+            break
                 
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
         
         #SOMETHING HERE TO SWITCH SIDES WITHOUT COLLIDING: TOM WILL PUT<<======================
         
-        for i in range(len(rightBlocks)):	
+        for i in range(len(rightBlocks),0):	
             bearings = getBearingToPoint(rightBlocks[i][0],0,rightBlocks[i][2])
             rotateUntilBearing(bearings[i],getBearingInDegrees())		
                     
@@ -736,20 +728,23 @@ while robot.step(TIME_STEP) != -1:
             	
             if checkgoround == False:	
                 rotateUntilBearing(bearings[i], getBearingInDegrees())			
-                move_forwards()			
-                open_arms()   		
+                move_forwards()					
                 		
                 while robot.step(TIME_STEP) != -1:	       			
                     xdiff = rightBlocks[i][0] - gps.getValues()[0]			
                     zdiff = righBlocks[i][1] - gps.getValues()[2]			
                     distance = math.sqrt(xdiff**2 + zdiff**2)		
-                			
+                    
+                    if distance < 0.2:
+                        open_arms()
+                        		
                     if distance < 0.1:			
                         motor_left.setVelocity(0)			
                         motor_right.setVelocity(0)					
                         close_arms()					
                         moveblock = False			
-                        gotblock = True				
+                        gotblock = True
+                        rightBlocks.pop(rightBlocks[i])				
                         break
                         
                     #The code below should not be necessary as we know that rightblocks[i] exists
@@ -788,13 +783,14 @@ while robot.step(TIME_STEP) != -1:
                 moveblock = True			
                 gotblock = False			
         
-        #Once the for loop above finishes running, the bot should finish and return to start        
         returnToStart()   
-        print("Red finished")    	
+        print("Red finished")
+        break	
             		
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 200:			
+    if i == 500:
+        print("Exiting due to timeout")			
         returnToStart()			
         break

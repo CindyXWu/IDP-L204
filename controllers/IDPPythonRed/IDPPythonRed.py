@@ -529,9 +529,7 @@ gotblock = False
 moveblock = False			
 blockred = False 			
 wrongBlocks = []
-rightBlocks = []
 firstHalf = True
-finishedSecondHalf = False	
 otherRobotFinished = False	
 gotallblock = False	
 	
@@ -721,7 +719,11 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            scanblocks = False
+            otherRobotFinished = True
+            scanblocks = False						
+            moveblock = False			
+            blockred = False 				
+            gotallblock = False
         else:
             j += 1
             if j == 100:
@@ -844,8 +846,9 @@ while robot.step(TIME_STEP) != -1:
                     open_arms()			
                     shuffle_back()			
                     moveblock = True					
-    
-            gotallblock = True
+                
+                if j == len(GPSOfBlocks):
+                    gotallblock = True
     
     if gotallblock == True:
         returnToStart()

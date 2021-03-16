@@ -535,7 +535,6 @@ gotblock = False
 moveblock = False			
 blockgreen = False 			
 wrongBlocks = []
-rightBlocks = []
 firstHalf = True	
 otherRobotFinished = False
 gotallblock = False		
@@ -718,10 +717,15 @@ while robot.step(TIME_STEP) != -1:
 #NOTE: TOM WILL WRITE FUNCTION TO MAKE ROBOTS SWITCH HALVES WITHOUT BUMPING INTO EACH OTHER
     #If a robot is finished and has not yet got data from the robot, it will sit and 
     #attempt to receive data. This loop ends once all data is passed on.#
+    
     j = 0
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
+            scanblocks = False						
+            moveblock = False			
+            blockgreen = False 				
+            gotallblock = False	
         else:
             j += 1
             if j == 100:
@@ -836,17 +840,18 @@ while robot.step(TIME_STEP) != -1:
                     	        	
                 #TAKING BLOCK TO START POINT     			
                 if moveblock == False and blockgreen==True:	
-                    altRoute = checkStartCross(0, 0.4, True)				
+                    altRoute = checkStartCross(0, -0.4, True)				
                     if altRoute == False:	
                         returnToStart()	
                     else:	
                         bearings[0] = getBearingToPoint()	
-                        alternateRoute(0, 0.4)			
+                        alternateRoute(0, -0.4)			
                     open_arms()			
                     shuffle_back()			
                     moveblock = True
                     			
-        gotallblock = True
+                if j == len(GPSOfBlocks):   
+                    gotallblock = True
         
     if gotallblock ==True:
         returnToStart()

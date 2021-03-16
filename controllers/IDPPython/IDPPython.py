@@ -219,7 +219,7 @@ def rotateTheta(theta):
     while robot.step(TIME_STEP) != -1:			
         bearing = getBearingInDegrees()  			
         #Get bearing of block from where I am 			
-        if (bearing - initial_bearing) >= -0.01:    #If i'm not pointing at block, angle to rotated is different			
+        if (bearing - initial_bearing) >= -0.1:    #If i'm not pointing at block, angle to rotated is different			
             angle_rotated = bearing - initial_bearing			
         else: 			
             angle_rotated = bearing - initial_bearing + 360			
@@ -239,7 +239,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
         previousbearing = getBearingInDegrees()		
         while robot.step(TIME_STEP) != -1:     		
             bearing = getBearingInDegrees()	
-            if bearing<previousbearing - 0.01:		
+            if bearing<previousbearing - 0.1:		
                 motor_left.setVelocity(0)		
                 motor_right.setVelocity(0)		
                 break	
@@ -248,7 +248,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
         rotate_CW()	
         while robot.step(TIME_STEP) != -1:     	
             bearing = getBearingInDegrees()	
-            if bearing >= target_bearing - 0.01:	
+            if bearing >= target_bearing - 0.1:	
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0)	
                 break	
@@ -256,7 +256,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
         rotate_ACW()	
         while robot.step(TIME_STEP) != -1:	
             bearing = getBearingInDegrees()	
-            if bearing <= target_bearing + 0.01:	
+            if bearing <= target_bearing + 0.1:	
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0) 	
                 break   
@@ -276,9 +276,9 @@ def doScan(theta, initial_bearing):
         			         			
         i += 1			
         			
-        if (bearing - initial_bearing) >= -0.01:			
+        if (bearing - initial_bearing) >= -0.1:			
             angle_rotated = bearing - initial_bearing			
-        if bearing - initial_bearing < -0.01:			
+        if bearing - initial_bearing < -0.1:			
             angle_rotated = bearing + (360 - initial_bearing)			
         if angle_rotated > theta:			
             motor_left.setVelocity(0)			

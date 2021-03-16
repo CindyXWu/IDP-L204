@@ -1,7 +1,7 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter			
 import math			
 import struct			
-TIME_STEP = 16			
+TIME_STEP = 8			
 MAX_SPEED = 10			
 # create a robot			
 robot = Robot() 			
@@ -134,7 +134,7 @@ def shuffle_back():
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==200:			
+      if i==400:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break				
@@ -146,13 +146,13 @@ def shuffle_back_short():
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==90:			
+      if i==180:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break		
 def wait():
     wait = 0
-    while robot.step(TIME_STEP) != -1 and wait<30:
+    while robot.step(TIME_STEP) != -1 and wait<60:
         wait += 1 
 #============================READING SENSOR VALUES====================================        				
 def getColour():		
@@ -304,9 +304,9 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :			
         alpha = sensorValueScan[i][2];			
     #Conditions for blocks to be picked out: large jump from previous value		
-        if (sensorValueScan[i - 1][2] - alpha) > 0.12:			
+        if (sensorValueScan[i - 1][2] - alpha) > 0.105:			
             blockBearings.append(sensorValueScan[i][3])			
-            blockDistances.append(alpha)			
+            blockDistances.append(alpha)		
     for i in range(len(blockBearings)):			
         xcoord = gps.getValues()[0] + (blockDistances[i] + 0.12) * math.cos(blockBearings[i] * math.pi / 180);			
         zcoord = gps.getValues()[2] + (blockDistances[i] + 0.12) * math.sin(blockBearings[i] * math.pi / 180);			

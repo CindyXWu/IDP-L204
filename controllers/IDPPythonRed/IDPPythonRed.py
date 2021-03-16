@@ -36,20 +36,21 @@ nextTargetIdentified = False
 def foundGreen(gpsLocation):		
     message = struct.pack("idd",0,gpsLocation[0],gpsLocation[1])		
     emitter.send(message)
-    print("RED SENDING FOUND GREEN MESSAGE: ", gpsLocation[0], gpsLocation[1])
+    #print("RED SENDING FOUND GREEN MESSAGE: ", gpsLocation[0], gpsLocation[1])
 def target(gpsLocation):		
     message = struct.pack("idd",1,gpsLocation[0],gpsLocation[1])		
     emitter.send(message)
-    print("RED SENDING TARGET LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])
+    #print("RED SENDING TARGET LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])
 def sendCurrentLocation(gpsLocation):
     message = struct.pack("idd",2,gpsLocation[0],gpsLocation[1])
     emitter.send(message)
-    print("RED SENDING CURRENT LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])			
+    #print("RED SENDING CURRENT LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])			
 def receivingData():	
     try:	
         message=receiver.getData()	
         dataList=struct.unpack("idd",message)
-        print("RED RECEIVED DATA ", dataList)
+        #print("RED RECEIVED DATA ", dataList)
+        #print("RED QUEUE LENGTH: ", receiver.getQueueLength())
         receiver.nextPacket()
         #print(dataList[0])		
         if dataList[0] == 0: #Look I don't know how this thing works, it's definetly one of these		
@@ -69,7 +70,7 @@ def receivingData():
             return otherRobotLocation, nextTargetIdentified  
     except SystemError:
         nextTargetIdentified = False
-        print("Red in Error branch")
+        #print("Red in Error branch")
         other = [0,0]
         return other, nextTargetIdentified	
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):

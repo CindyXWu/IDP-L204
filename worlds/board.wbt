@@ -1,7 +1,6 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
   basicTimeStep 8
-  FPS 15
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
@@ -143,5 +142,5 @@ target {
 robotmain {
 }
 robotmainred {
-  translation 2 0.0546 0.4
+  translation 0 0.0547753 0.400047
 }

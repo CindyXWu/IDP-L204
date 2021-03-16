@@ -19,12 +19,12 @@ Robot {
     Emitter {
 	translation 0 0 0
 	name "emitter"
-	SFInt32  channel    2
+	channel    2
     }
     Receiver {
 	translation 0 0 0
 	name "receiver"
-	SFInt32  channel    1
+	channel    1
     }
     SharpGP2Y0A02YK0F {	
       translation 0 -0.02 0.12	

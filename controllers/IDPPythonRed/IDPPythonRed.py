@@ -119,13 +119,13 @@ def close_arms():
 def rotate_ACW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(-0.4 * MAX_SPEED)	
-    motor_right.setVelocity(0.4 * MAX_SPEED)	
+    motor_left.setVelocity(-0.3 * MAX_SPEED)	
+    motor_right.setVelocity(0.3 * MAX_SPEED)	
 def rotate_CW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(0.4 * MAX_SPEED)	
-    motor_right.setVelocity(-0.4 * MAX_SPEED)	
+    motor_left.setVelocity(0.3 * MAX_SPEED)	
+    motor_right.setVelocity(-0.3 * MAX_SPEED)	
 def shuffle_back():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
@@ -146,7 +146,7 @@ def shuffle_back_short():
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
-      if i==50:	
+      if i==90:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
@@ -637,7 +637,8 @@ while robot.step(TIME_STEP) != -1:
                             wait()		
                             colour = getColour();	
                             if colour == False:			
-                                print("Red bot has located a green block")			
+                                print("Red bot has located a green block")	
+                                open_arms()		
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
@@ -672,7 +673,8 @@ while robot.step(TIME_STEP) != -1:
                 wait()			
                 colour = getColour();		
                 if colour == False:			
-                    print("Red bot has located a green block")			
+                    print("Red bot has located a green block")	
+                    open_arms()		
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])			
@@ -794,6 +796,6 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 500:			
+    if i == 200:			
         returnToStart()			
         break

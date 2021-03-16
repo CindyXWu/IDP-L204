@@ -154,7 +154,10 @@ def shuffle_back_short():
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break		
-
+def wait():
+    wait = 0
+    while robot.step(TIME_STEP) != -1 and wait<30:
+        wait += 1 
 #============================READING SENSOR VALUES====================================        				
 def getColour():		
     #this function only checks if the sensor is returning a high value			
@@ -617,7 +620,6 @@ while robot.step(TIME_STEP) != -1:
             except IndexError:
                 sendFinished(wrongBlocks)
                 firstHalf = False
-                break	
             
             #If we don't need to reroute, run Cindy's orginal code as normal	
             if checkgoround == False and firstHalf == True:	
@@ -664,7 +666,6 @@ while robot.step(TIME_STEP) != -1:
                 except IndexError:
                     firstHalf = False
                     sendFinished(wrongBlocks)
-                    break	
                     
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
@@ -719,7 +720,7 @@ while robot.step(TIME_STEP) != -1:
             else:
                 pass
         #Basically the same as the else condition above, but just in case
-        except Error:
+        except IndexError:
             pass
         
     #Now going to collect and bring back all blocks in turn
@@ -750,8 +751,7 @@ while robot.step(TIME_STEP) != -1:
                         close_arms()					
                         moveblock = False			
                         gotblock = True			
-                        break	
-                    
+                        break
                     #The code below should not be necessary as we know that rightblocks[i] exists
                     #except IndexError:
                        # returnToStart()
@@ -787,7 +787,6 @@ while robot.step(TIME_STEP) != -1:
                 shuffle_back()			
                 moveblock = True			
                 gotblock = False			
-                scanblocks = False	
         
         #Once the for loop above finishes running, the bot should finish and return to start        
         returnToStart()   

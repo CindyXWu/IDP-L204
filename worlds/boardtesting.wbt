@@ -126,7 +126,7 @@ target {
   name "target(6)"
 }
 target {
-  translation 0.508979 0.03 -0.322989
+  translation 0.728435 0.03 -0.360478
   colour 0 1 0
   name "target(7)"
 }

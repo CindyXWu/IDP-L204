@@ -18,15 +18,13 @@ Robot {
       translation 0 0 0
       name "compass"
     }
-    Emitter {
+Emitter {
 	translation 0 0 0
 	name "emitter"
-	channel    1
     }
     Receiver {
 	translation 0 0 0
 	name "receiver"
-	channel    2
     }
     SharpGP2Y0A02YK0F {
       translation 0 -0.02 0.12
@@ -381,11 +379,11 @@ Robot {
       ]	
       name "TEPT4400"	
       lookupTable [	
-        0 0 0	
-        0.333 0.51 0.1	
-        0.413 0.63 0.1	
-        0.654 0.99 0.1	
-	1.225 1.86 0.1
+        0 0 0
+        0.333 0.496 0.01
+        0.413 0.610 0.01
+        0.654 0.949 0.01
+        1.225 1.710 0.01
       ]	
       colorFilter 0 1 0	
     }
@@ -410,11 +408,11 @@ Robot {
       ]	
       name "TEPT4400_left"	
       lookupTable [	
-        0 0 0	
-        0.333 0.51 0.1	
-        0.413 0.63 0.1	
-        0.654 0.99 0.1	
-	1.225 1.86 0.1
+        0 0 0
+        0.333 0.496 0.01
+        0.413 0.610 0.01
+        0.654 0.949 0.01
+        1.225 1.710 0.01
       ]	
       colorFilter 0 1 0	
     }
@@ -439,11 +437,11 @@ Robot {
       ]	
       name "TEPT4400_right"	
       lookupTable [	
-        0 0 0	
-        0.333 0.51 0.1	
-        0.413 0.63 0.1	
-        0.654 0.99 0.1	
-	1.225 1.86 0.1
+        0 0 0
+        0.333 0.496 0.01
+        0.413 0.610 0.01
+        0.654 0.949 0.01
+        1.225 1.710 0.01
       ]	
       colorFilter 0 1 0	
     }			

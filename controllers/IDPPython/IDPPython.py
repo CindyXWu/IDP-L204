@@ -46,6 +46,10 @@ def sendCurrentLocation(gpsLocation):
     message = struct.pack("idd",2,gpsLocation[0],gpsLocation[1])	
     emitter.send(message)
     #print("GREEN SENDING CURRENT LOCATION MESSAGE: ", gpsLocation[0], gpsLocation[1])			
+def sendFinished():
+    message = struct.pack("i",3)
+    emitter.send(message)
+    print("I said I finished ok")
 def receivingData():		
     try:
         receiver.nextPacket()	#this function is not to be forgotten		
@@ -69,7 +73,10 @@ def receivingData():
             #print("Green is in Happy branch 2")	
             otherRobotLocation = (dataList[1],dataList[2])	
             nextTargetIdentified = False	
-            return otherRobotLocation, nextTargetIdentified  	
+            return otherRobotLocation, nextTargetIdentified 
+        if dataList[0] == 3:
+            otherRobotFinished = True
+            return otherRobotFinished 	
     except SystemError:	
         #print("Green in error branch")	
         nextTargetIdentified = False	
@@ -87,8 +94,8 @@ def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
 def move_forwards():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(MAX_SPEED)			
-    motor_right.setVelocity(MAX_SPEED)			
+    motor_left.setVelocity(0.5*MAX_SPEED)			
+    motor_right.setVelocity(0.5*MAX_SPEED)			
 def open_arms():			
     arm_left.setPosition(0.2)			
     arm_right.setPosition(-0.2)			
@@ -487,7 +494,8 @@ scanblocks = False
 gotblock = False			
 moveblock = False			
 blockgreen = False  #what color of robot is this controller for? I think the current proto has [1 0 0] (red) filters			
-wrongBlocks = []			
+wrongBlocks = []
+firstHalf = True			
 	
 while robot.step(TIME_STEP) != -1:			
     	
@@ -503,142 +511,291 @@ while robot.step(TIME_STEP) != -1:
 
     #CONDITION ONE: INITIAL SCAN (ONLY DONE IF OTHER BOT HAS NOT SENT GPS OF 
     #BLOCK IDENTIFIED TO BE THE WRONG COLOUR FOR IT)
-    current_position = gps.getValues()
-    bearing = getBearingUpwards(current_position[0],current_position[2])
-    rotateUntilBearing(bearing,getBearingInDegrees())
-    if scanblocks == False:			
-        current_bearing = getBearingInDegrees()			
-        sensorValueScan = doScan(180, current_bearing)				
-        scanblocks = True		
-
-    #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			
-    if scanblocks==True and gotblock == False:	
-
-        if nextTargetIdentified == True:
-        	nextTargetIdentified = False
-        	GPSOfBlocks = receivedCoordinate
-        	bearings = getBearingToPoint(GPSOfBlocks[0],0, GPSOfBlocks[1])
-            
-        if nextTargetIdentified == False:	
-            GPSOfBlocks, bearings, distances = getBlockData()	
-            indicesToRemoveForCollected = []	
-        	
-            #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
-            for i in range(len(GPSOfBlocks)):	
-                if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
-                    indicesToRemoveForCollected.append(i)	
+    if firstHalf == True:
+        current_position = gps.getValues()
+        bearing = getBearingUpwards(current_position[0],current_position[2])
+        rotateUntilBearing(bearing,getBearingInDegrees())
+       
+        if scanblocks == False:			
+            current_bearing = getBearingInDegrees()			
+            sensorValueScan = doScan(180, current_bearing)				
+            scanblocks = True		
+    
+        #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			
+        if scanblocks==True and gotblock == False:	
+    
+            if nextTargetIdentified == True:
+            	nextTargetIdentified = False
+            	GPSOfBlocks = receivedCoordinate
+            	bearings = getBearingToPoint(GPSOfBlocks[0],0, GPSOfBlocks[1])
                 
-            #It is very important that we delete the higher index first, so that 	
-            #by deleting indices one by one, we are not affecting remaining deletions	
-            #And you know that indicesToRemoveForCollected has indices in ascending order	
-            #So iterate through backwards	
-            for index in sorted(indicesToRemoveForCollected, reverse=True):		
-                GPSOfBlocks.pop(index)	
-                bearings.pop(index)	
-                distances.pop(index)		
-                
-            #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
-            if int(len(wrongBlocks)) > 0:	
-                indicesToRemove = []		
-                            
-                for i in range(len(GPSOfBlocks)):			
-                    for j in range(len(wrongBlocks)):				
-                        #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again			
-                        xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]			
-                        zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]				
-                        distanceBetweenReadings = math.sqrt(xdelta**2 + zdelta**2)			
-                                
-                        if distanceBetweenReadings < 0.15:			
-                            #This means the same block is being read again. Delete it from the front of the list			
-                            indicesToRemove.append(i)	
-                                
-                #Same logic as above; we must iterate backwards         	                       		
-                for index in sorted(indicesToRemove,reverse=True):	  	
+            if nextTargetIdentified == False:	
+                GPSOfBlocks, bearings, distances = getBlockData()	
+                indicesToRemoveForCollected = []	
+            	
+                #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
+                for i in range(len(GPSOfBlocks)):	
+                    if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
+                        indicesToRemoveForCollected.append(i)	
+                    
+                #It is very important that we delete the higher index first, so that 	
+                #by deleting indices one by one, we are not affecting remaining deletions	
+                #And you know that indicesToRemoveForCollected has indices in ascending order	
+                #So iterate through backwards	
+                for index in sorted(indicesToRemoveForCollected, reverse=True):		
                     GPSOfBlocks.pop(index)	
                     bearings.pop(index)	
-                    distances.pop(index)	
-                
-        #NOW GOING TO ANY UNVISITED BLOCKS	
-        try:
-            checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
-        except IndexError:
-            returnToStart()
-            break	
-        	
-        if checkgoround == False:	
-            rotateUntilBearing(bearings[0], getBearingInDegrees())			
-            move_forwards()			
-            open_arms()   		
-            		
-            while robot.step(TIME_STEP) != -1:
-                try:	       			
-                    xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]			
-                    zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]			
-                    distance = math.sqrt(xdiff**2 + zdiff**2)		
-                			
-                    if distance < 0.1:			
-                        motor_left.setVelocity(0)			
-                        motor_right.setVelocity(0)			
-                        colour = getColour();
-                        colour = True			
-                        if colour == False:			
-                            print("Green bot has located a red block")			
-                            shuffle_back_short()			
-                            scanblocks=False			
-                            wrongBlocks.append(GPSOfBlocks[0])			
-                            break			
+                    distances.pop(index)		
+                    
+                #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
+                if int(len(wrongBlocks)) > 0:	
+                    indicesToRemove = []		
+                                
+                    for i in range(len(GPSOfBlocks)):			
+                        for j in range(len(wrongBlocks)):				
+                            #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again			
+                            xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]			
+                            zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]				
+                            distanceBetweenReadings = math.sqrt(xdelta**2 + zdelta**2)			
+                                    
+                            if distanceBetweenReadings < 0.15:			
+                                #This means the same block is being read again. Delete it from the front of the list			
+                                indicesToRemove.append(i)	
+                                    
+                    #Same logic as above; we must iterate backwards         	                       		
+                    for index in sorted(indicesToRemove,reverse=True):	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)	
+                    
+            #NOW GOING TO ANY UNVISITED BLOCKS	
+            try:
+                checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
+            except IndexError:
+                returnToStart()
+                sendFinished()
+                firstHalf = False
+                break	
+            	
+            if checkgoround == False:	
+                rotateUntilBearing(bearings[0], getBearingInDegrees())			
+                move_forwards()			
+                open_arms()   		
+                		
+                while robot.step(TIME_STEP) != -1:
+                    try:	       			
+                        xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]			
+                        zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]			
+                        distance = math.sqrt(xdiff**2 + zdiff**2)		
                     			
-                        elif colour == True:			
-                            close_arms()			
-                            blockgreen=True			
-                            print("Green bot has located a green block")			
-                            moveblock = False			
-                            gotblock = True			
-                            break	
+                        if distance < 0.1:			
+                            motor_left.setVelocity(0)			
+                            motor_right.setVelocity(0)			
+                            colour = getColour();
+                            colour = True			
+                            if colour == False:			
+                                print("Green bot has located a red block")			
+                                shuffle_back_short()			
+                                scanblocks=False			
+                                wrongBlocks.append(GPSOfBlocks[0])			
+                                break			
+                        			
+                            elif colour == True:			
+                                close_arms()			
+                                blockred=True			
+                                print("Green bot has located a green block")			
+                                moveblock = False			
+                                gotblock = True			
+                                break	
+                    except IndexError:
+                        returnToStart()
+                        sendFinished()
+                        firstHalf = False
+                        break
+                            	
+            if checkgoround == True:       	
+                try:
+                    x,y = GPSOfBlocks[0][0], GPSOfBlocks[0][1]
                 except IndexError:
                     returnToStart()
-                    break
-                        	
-        if checkgoround == True:       	
+                    firstHalf = False
+                    sendFinished()
+                    break	
+                    
+                alternateRoute(x, y)	
+                motor_left.setVelocity(0)			
+                motor_right.setVelocity(0)			
+                colour = getColour();
+                colour = True			
+                if colour == False:			
+                    print("Green bot has located a red block")			
+                    shuffle_back_short()			
+                    scanblocks=False			
+                    wrongBlocks.append(GPSOfBlocks[0])	
+                    			
+                elif colour == True:			
+                    close_arms()			
+                    blockred=True			
+                    print("Green bot has located a green block")			
+                    moveblock = False			
+                    gotblock = True		
+        	
+        #TAKING BLOCK TO START POINT     			
+        if moveblock == False and blockred==True:	
+            altRoute = checkStartCross(0, -0.4, True)				
+            if altRoute == False:	
+                returnToStart()	
+            else:	
+                bearings[0] = getBearingToPoint()	
+                alternateRoute(0, -0.4)			
+            open_arms()			
+            shuffle_back()			
+            moveblock = True			
+            gotblock = False			
+            scanblocks = False	
+            
+        otherRobotFinished = receivingData()	
+            		
+        i += 1
+        
+    if firstHalf == False and otherRobotFinished == True:
+        current_position = gps.getValues()
+        bearing = getBearingUpwards(current_position[0],current_position[2])
+        rotateUntilBearing(bearing,getBearingInDegrees())
+       
+        if scanblocks == False:			
+            current_bearing = getBearingInDegrees()			
+            sensorValueScan = doScan(180, current_bearing)				
+            scanblocks = True		
+    
+        #CONDITION THREE: NO BLOCKS SENT FROM OTHER BOT			
+        if scanblocks==True and gotblock == False:	
+    
+            if nextTargetIdentified == True:
+            	nextTargetIdentified = False
+            	GPSOfBlocks = receivedCoordinate
+            	bearings = getBearingToPoint(GPSOfBlocks[0],0, GPSOfBlocks[1])
+                
+            if nextTargetIdentified == False:	
+                GPSOfBlocks, bearings, distances = getBlockData()	
+                indicesToRemoveForCollected = []	
+            	
+                #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
+                for i in range(len(GPSOfBlocks)):	
+                    if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
+                        indicesToRemoveForCollected.append(i)	
+                    
+                #It is very important that we delete the higher index first, so that 	
+                #by deleting indices one by one, we are not affecting remaining deletions	
+                #And you know that indicesToRemoveForCollected has indices in ascending order	
+                #So iterate through backwards	
+                for index in sorted(indicesToRemoveForCollected, reverse=True):		
+                    GPSOfBlocks.pop(index)	
+                    bearings.pop(index)	
+                    distances.pop(index)		
+                    
+                #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
+                if int(len(wrongBlocks)) > 0:	
+                    indicesToRemove = []		
+                                
+                    for i in range(len(GPSOfBlocks)):			
+                        for j in range(len(wrongBlocks)):				
+                            #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again			
+                            xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]			
+                            zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]				
+                            distanceBetweenReadings = math.sqrt(xdelta**2 + zdelta**2)			
+                                    
+                            if distanceBetweenReadings < 0.15:			
+                                #This means the same block is being read again. Delete it from the front of the list			
+                                indicesToRemove.append(i)	
+                                    
+                    #Same logic as above; we must iterate backwards         	                       		
+                    for index in sorted(indicesToRemove,reverse=True):	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)	
+                    
+            #NOW GOING TO ANY UNVISITED BLOCKS	
             try:
-                x,y = GPSOfBlocks[0][0], GPSOfBlocks[0][1]
+                checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
             except IndexError:
                 returnToStart()
                 break	
-                
-            alternateRoute(x, y)	
-            motor_left.setVelocity(0)			
-            motor_right.setVelocity(0)			
-            colour = getColour();
-            colour = True			
-            if colour == False:			
-                print("Green bot has located a red block")			
-                shuffle_back_short()			
-                scanblocks=False			
-                wrongBlocks.append(GPSOfBlocks[0])	
-                			
-            elif colour == True:			
-                close_arms()			
-                blockgreen=True			
-                print("Green bot has located a green block")			
-                moveblock = False			
-                gotblock = True		
-    	
-    #TAKING BLOCK TO START POINT     			
-    if moveblock == False and blockgreen==True:	
-        altRoute = checkStartCross(0, -0.4, True)				
-        if altRoute == False:	
-            returnToStart()	
-        else:	
-            bearings[0] = getBearingToPoint()	
-            alternateRoute(0, -0.4)			
-        open_arms()			
-        shuffle_back()			
-        moveblock = True			
-        gotblock = False			
-        scanblocks = False		
-        		
-    i += 1		
+            	
+            if checkgoround == False:	
+                rotateUntilBearing(bearings[0], getBearingInDegrees())			
+                move_forwards()			
+                open_arms()   		
+                		
+                while robot.step(TIME_STEP) != -1:
+                    try:	       			
+                        xdiff = GPSOfBlocks[0][0] - gps.getValues()[0]			
+                        zdiff = GPSOfBlocks[0][1] - gps.getValues()[2]			
+                        distance = math.sqrt(xdiff**2 + zdiff**2)		
+                    			
+                        if distance < 0.1:			
+                            motor_left.setVelocity(0)			
+                            motor_right.setVelocity(0)			
+                            colour = getColour();
+                            colour = True			
+                            if colour == False:			
+                                print("Green bot has located a red block")			
+                                shuffle_back_short()			
+                                scanblocks=False			
+                                wrongBlocks.append(GPSOfBlocks[0])			
+                                break			
+                        			
+                            elif colour == True:			
+                                close_arms()			
+                                blockred=True			
+                                print("Green bot has located a green block")			
+                                moveblock = False			
+                                gotblock = True			
+                                break	
+                    except IndexError:
+                        returnToStart()
+                        break
+                            	
+            if checkgoround == True:       	
+                try:
+                    x,y = GPSOfBlocks[0][0], GPSOfBlocks[0][1]
+                except IndexError:
+                    returnToStart()
+                    break	
+                    
+                alternateRoute(x, y)	
+                motor_left.setVelocity(0)			
+                motor_right.setVelocity(0)			
+                colour = getColour();
+                colour = True			
+                if colour == False:			
+                    print("Green bot has located a red block")			
+                    shuffle_back_short()			
+                    scanblocks=False			
+                    wrongBlocks.append(GPSOfBlocks[0])	
+                    			
+                elif colour == True:			
+                    close_arms()			
+                    blockred=True			
+                    print("Green bot has located a green block")			
+                    moveblock = False			
+                    gotblock = True		
+        	
+        #TAKING BLOCK TO START POINT     			
+        if moveblock == False and blockred==True:	
+            altRoute = checkStartCross(0, -0.4, True)				
+            if altRoute == False:	
+                returnToStart()	
+            else:	
+                bearings[0] = getBearingToPoint()	
+                alternateRoute(0, -0.4)			
+            open_arms()			
+            shuffle_back()			
+            moveblock = True			
+            gotblock = False			
+            scanblocks = False		
+            		
+        i += 1				
     		
     if i == 500:			
         returnToStart()			

@@ -100,8 +100,8 @@ def open_arms():
     arm_left.setPosition(0.2)			
     arm_right.setPosition(-0.2)			
 def close_arms():			
-    arm_left.setPosition(0) 			
-    arm_right.setPosition(0)   			
+    arm_left.setPosition(-0.1) 			
+    arm_right.setPosition(0.1)   			
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
@@ -147,9 +147,11 @@ def getColour():
    	
     raw1 = light_sensor.getValue()			
     raw2 = light_sensor_l.getValue()		
-    raw3 = light_sensor_r.getValue()		
+    raw3 = light_sensor_r.getValue()
+    
+    print(raw1, raw2, raw3)		
     		
-    if raw1 > 0.58 or raw2 > 0.58 or raw3 > 0.58: 	
+    if raw1 > 0.65 or raw2 > 0.65 or raw3 > 0.65: 	
         led = True #Green	
     else:			
         led = False #Red			
@@ -590,19 +592,19 @@ while robot.step(TIME_STEP) != -1:
                     			
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
-                            motor_right.setVelocity(0)			
-                            colour = getColour();
-                            colour = True			
+                            motor_right.setVelocity(0)
+                            close_arms()	#close the arms in to align the block		
+                            colour = getColour();		
                             if colour == False:			
-                                print("Green bot has located a red block")			
+                                print("Green bot has located a red block")
+                                open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
                                 break			
                         			
-                            elif colour == True:			
-                                close_arms()			
-                                blockred=True			
+                            elif colour == True:					
+                                blockgreen=True			
                                 print("Green bot has located a green block")			
                                 moveblock = False			
                                 gotblock = True			
@@ -624,24 +626,24 @@ while robot.step(TIME_STEP) != -1:
                     
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
-                motor_right.setVelocity(0)			
-                colour = getColour();
-                colour = True			
+                motor_right.setVelocity(0)
+                close_arms()			
+                colour = getColour();			
                 if colour == False:			
-                    print("Green bot has located a red block")			
+                    print("Green bot has located a red block")
+                    open_arms()			
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])	
                     			
-                elif colour == True:			
-                    close_arms()			
-                    blockred=True			
+                elif colour == True:						
+                    blockgreen=True			
                     print("Green bot has located a green block")			
                     moveblock = False			
                     gotblock = True		
         	
         #TAKING BLOCK TO START POINT     			
-        if moveblock == False and blockred==True:	
+        if moveblock == False and blockgreen==True:	
             altRoute = checkStartCross(0, -0.4, True)				
             if altRoute == False:	
                 returnToStart()	
@@ -735,19 +737,19 @@ while robot.step(TIME_STEP) != -1:
                     			
                         if distance < 0.1:			
                             motor_left.setVelocity(0)			
-                            motor_right.setVelocity(0)			
-                            colour = getColour();
-                            colour = True			
+                            motor_right.setVelocity(0)
+                            close_arms()			
+                            colour = getColour();		
                             if colour == False:			
-                                print("Green bot has located a red block")			
+                                print("Green bot has located a red block")
+                                open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
                                 break			
                         			
-                            elif colour == True:			
-                                close_arms()			
-                                blockred=True			
+                            elif colour == True:					
+                                blockgreen=True			
                                 print("Green bot has located a green block")			
                                 moveblock = False			
                                 gotblock = True			
@@ -765,24 +767,24 @@ while robot.step(TIME_STEP) != -1:
                     
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
-                motor_right.setVelocity(0)			
-                colour = getColour();
-                colour = True			
+                motor_right.setVelocity(0)
+                close_arms()			
+                colour = getColour();			
                 if colour == False:			
-                    print("Green bot has located a red block")			
+                    print("Green bot has located a red block")
+                    open_arms()			
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])	
                     			
-                elif colour == True:			
-                    close_arms()			
-                    blockred=True			
+                elif colour == True:					
+                    blockgreen=True			
                     print("Green bot has located a green block")			
                     moveblock = False			
                     gotblock = True		
         	
         #TAKING BLOCK TO START POINT     			
-        if moveblock == False and blockred==True:	
+        if moveblock == False and blockgreen==True:	
             altRoute = checkStartCross(0, -0.4, True)				
             if altRoute == False:	
                 returnToStart()	

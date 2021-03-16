@@ -1,5 +1,5 @@
 PROTO robotmain [	
-  field SFVec3f    translation  0 0.0546 -0.4	
+  field SFVec3f    translation  0 0.546 0	
   field SFRotation rotation     0 1 0 0	
   field SFFloat    bodyMass     3	
 ]	
@@ -18,16 +18,6 @@ Robot {
       translation 0 0 0
       name "compass"
     }
-    Emitter {
-	translation 0 0 0
-	name "emitter"
-	SFInt32  channel    1
-    }
-    Receiver {
-	translation 0 0 0
-	name "receiver"
-	SFInt32  channel    2
-    }
     SharpGP2Y0A02YK0F {
       translation 0 -0.02 0.12
       rotation -0.5773502691896258 0.5773502691896258 -0.5773502691896258 -2.094395307179586
@@ -35,7 +25,7 @@ Robot {
     DEF Arm_R HingeJoint {	
       jointParameters HingeJointParameters {	
         axis 0 1 0	
-        anchor -0.045 -0.02 0.08	
+        anchor -0.045 -0.01 0.08	
       }	
       device [	
         RotationalMotor {	
@@ -43,7 +33,7 @@ Robot {
         }	
       ]	
       endPoint Solid {	
-        translation -0.045 -0.02 0.15	
+        translation -0.045 -0.01 0.15	
         children [	
           DEF Arm_end Solid {	
             translation 0.01 -0.005 0.065	
@@ -79,7 +69,7 @@ Robot {
     DEF Arm_L HingeJoint {	
       jointParameters HingeJointParameters {	
         axis 0 1 0	
-        anchor 0.045 -0.02 0.08	
+        anchor 0.045 -0.01 0.08	
       }	
       device [	
         RotationalMotor {	
@@ -87,7 +77,7 @@ Robot {
         }	
       ]	
       endPoint Solid {	
-        translation 0.045 -0.02 0.15	
+        translation 0.045 -0.01 0.15	
         rotation 0.8786299483244112 0.00013268993011740653 -0.4775032945444721 4.2146848510894035e-08	
         children [	
           DEF Arm_end Solid {	
@@ -125,7 +115,9 @@ Robot {
       jointParameters HingeJointParameters {	
         anchor 0.0525 -0.035 -0.02	
       }	
-      device [	
+      device [
+        PositionSensor {
+        }	
         RotationalMotor {	
           name "Wheel_L"	
         }	
@@ -362,7 +354,7 @@ Robot {
     }	
     LightSensor {	
       translation 0 0.029 0.145	
-      rotation 0.171086 0.171104 0.970285 -1.60087	
+      rotation 0.25056115554904 0.25058515556393934 0.9351075805173039 -1.6377453071795864	
       children [	
         Solid {	
           children [	
@@ -387,66 +379,8 @@ Robot {
         0.654 0.99 0.1	
 	1.225 1.86 0.1
       ]	
-      colorFilter 0 1 0	
-    }
-    LightSensor {	
-      translation 0 0.029 0.145	
-      rotation 0.171086 -0.35104 0.970285 -1.8987	
-      children [	
-        Solid {	
-          children [	
-            DEF TEPT4400 Shape {	
-              appearance PBRAppearance {	
-                metalness 0	
-              }	
-              geometry Capsule {	
-                height 0.0044	
-                radius 0.003	
-              }	
-            }	
-          ]	
-          boundingObject USE TEPT4400	
-        }	
-      ]	
-      name "TEPT4400_left"	
-      lookupTable [	
-        0 0 0	
-        0.333 0.51 0.1	
-        0.413 0.63 0.1	
-        0.654 0.99 0.1	
-	1.225 1.86 0.1
-      ]	
-      colorFilter 0 1 0	
-    }
-    LightSensor {	
-      translation 0 0.029 0.145	
-      rotation 0.171086 -0.12 0.970285 -1.2587	
-      children [	
-        Solid {	
-          children [	
-            DEF TEPT4400 Shape {	
-              appearance PBRAppearance {	
-                metalness 0	
-              }	
-              geometry Capsule {	
-                height 0.0044	
-                radius 0.003	
-              }	
-            }	
-          ]	
-          boundingObject USE TEPT4400	
-        }	
-      ]	
-      name "TEPT4400_right"	
-      lookupTable [	
-        0 0 0	
-        0.333 0.51 0.1	
-        0.413 0.63 0.1	
-        0.654 0.99 0.1	
-	1.225 1.86 0.1
-      ]	
-      colorFilter 0 1 0	
-    }			
+      colorFilter 1 0 0	
+    }	
   ]	
   contactMaterial "robot"	
   boundingObject Box {	
@@ -456,7 +390,7 @@ Robot {
     density -1	
     mass IS bodyMass	
   }	
-  rotationStep 0.349
-  controller "IDPPython"
+  rotationStep 0.1309
+  controller "IDP_controller"
 }	
 }

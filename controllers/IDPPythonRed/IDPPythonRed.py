@@ -54,16 +54,23 @@ receiver.enable(TIME_STEP)
 
 #SEND COORDINATES OF BLOCKS OF WRONG COLOUR TO OTHER BOT
 def sendFinished(wrongBlocks):
-    for index in wrongBlocks:	
+    for index in wrongBlocks:
+        print("Red trying to send block: ", index[0],index[1])	
         message = struct.pack("idd",1,index[0],index[1])			
         emitter.send(message)
+        if robot.step(TIME_STEP) == -1:
+            break
         
 #RECEIVES COORDINATES FOR ONE BLOCK 
 def receivingData():	
     try:	
-        receiver.nextPacket()	#this function is not to be forgotten		
-        message=receiver.getData()	 #gets whatever is in receiver
-        dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+        while len(receiver.getQueueLength()) != 0:
+            message=receiver.getData()
+            print("Red received message from green")		
+            dataList=struct.unpack("idd",message) #array of everything that was sent in packet
+            rightBlocks.append([dataList[1],dataList[2]])
+            receiver.nextPacket()
+        return 1    
         #print("RED RECEIVED DATA ", dataList)
         #print("RED QUEUE LENGTH: ", receiver.getQueueLength())
         
@@ -89,13 +96,10 @@ def receivingData():
             #return otherRobotFinished
             
     #blockCoord IS JUST Z AND X VALUES OF ONE BLOCK
-        blockCoord = [dataList[1],	dataList[2]]
-        return blockCoord
-        
-    except SystemError:
-        other = 0
+    
+    except:
+        return 0
         #print("Red in Error branch")
-        return other
         
 def testIfTargetTheSame(otherRobotTarget,thisRobotTarget):
     if abs(otherRobotTarget[0] - thisRobotTarget[0]) < 0.05 and abs(otherRobotTarget[1] - thisRobotTarget[1]) < 0.05:
@@ -119,13 +123,13 @@ def close_arms():
 def rotate_ACW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(-0.4 * MAX_SPEED)	
-    motor_right.setVelocity(0.4 * MAX_SPEED)	
+    motor_left.setVelocity(-0.3 * MAX_SPEED)	
+    motor_right.setVelocity(0.3 * MAX_SPEED)	
 def rotate_CW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(0.4 * MAX_SPEED)	
-    motor_right.setVelocity(-0.4 * MAX_SPEED)	
+    motor_left.setVelocity(0.3 * MAX_SPEED)	
+    motor_right.setVelocity(-0.3 * MAX_SPEED)	
 def shuffle_back():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
@@ -146,7 +150,7 @@ def shuffle_back_short():
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
-      if i==50:	
+      if i==90:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
@@ -299,7 +303,7 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :	
         alpha = sensorValueScan[i][2];	
     #Conditions for blocks to be picked out:	large jump between previous value	
-        if (sensorValueScan[i - 1][2] - alpha) > 0.15:	
+        if (sensorValueScan[i - 1][2] - alpha) > 0.1:	
             blockBearings.append(sensorValueScan[i][3])	
             blockDistances.append(alpha)	
     for i in range(len(blockBearings)):	
@@ -616,7 +620,6 @@ while robot.step(TIME_STEP) != -1:
             except IndexError:
                 sendFinished(wrongBlocks)
                 firstHalf = False
-                break	
             
             #If we don't need to reroute, run Cindy's orginal code as normal	
             if checkgoround == False and firstHalf == True:	
@@ -638,7 +641,8 @@ while robot.step(TIME_STEP) != -1:
                             wait()		
                             colour = getColour();	
                             if colour == False:			
-                                print("Red bot has located a green block")			
+                                print("Red bot has located a green block")	
+                                open_arms()		
                                 shuffle_back_short()			
                                 scanblocks=False			
                                 wrongBlocks.append(GPSOfBlocks[0])			
@@ -664,8 +668,7 @@ while robot.step(TIME_STEP) != -1:
                     x,y = GPSOfBlocks[0][0], GPSOfBlocks[0][1]
                 except IndexError:
                     firstHalf = False
-                    sendFinished(wrongBlocks)
-                    break	
+                    sendFinished(wrongBlocks)	
                     
                 alternateRoute(x, y)	
                 motor_left.setVelocity(0)			
@@ -674,7 +677,8 @@ while robot.step(TIME_STEP) != -1:
                 wait()			
                 colour = getColour();		
                 if colour == False:			
-                    print("Red bot has located a green block")			
+                    print("Red bot has located a green block")	
+                    open_arms()		
                     shuffle_back_short()			
                     scanblocks=False			
                     wrongBlocks.append(GPSOfBlocks[0])			
@@ -704,25 +708,20 @@ while robot.step(TIME_STEP) != -1:
 #NOTE: TOM WILL WRITE FUNCTION TO MAKE ROBOTS SWITCH HALVES WITHOUT BUMPING INTO EACH OTHER
     
     #If a robot is finished and has not yet got data from the robot, it will sit and 
-    #attempt to receive data. This loop ends once all data is passed on.
-    while firstHalf == False and otherRobotFinished == False: 
-        try: 
-            rightBlocks[0] = receivingData()
-            
-            #If receivingData() is returning 0, means nothing is being sent
-            if rightBlocks[0] != 0:
-                for i in range(len(numberOfBlocksSent)-1):
-                    rightBlocks[i+1] = receivingData()
-                    otherRobotFinished = True
-                    break
-                    
-            #If nothing is being sent, pass and try again until something is received
+    #attempt to receive data. This loop ends once all data is passed on.#
+    j = 0
+    while firstHalf == False and otherRobotFinished == False:  
+        val = receivingData()
+        #If receivingData() is returning 0, means nothing is being sent
+        if val == 0:
+            j+=1
+            if j==100:
+                break
             else:
                 pass
-        #Basically the same as the else condition above, but just in case
-        except Error:
-            pass
-        
+        if val == 1:
+            break   
+                
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
         
@@ -750,9 +749,9 @@ while robot.step(TIME_STEP) != -1:
                         motor_right.setVelocity(0)					
                         close_arms()					
                         moveblock = False			
-                        gotblock = True			
-                        break	
-                    
+                        gotblock = True				
+                        break
+                        
                     #The code below should not be necessary as we know that rightblocks[i] exists
                     #except IndexError:
                        # returnToStart()
@@ -788,7 +787,6 @@ while robot.step(TIME_STEP) != -1:
                 shuffle_back()			
                 moveblock = True			
                 gotblock = False			
-                scanblocks = False	
         
         #Once the for loop above finishes running, the bot should finish and return to start        
         returnToStart()   
@@ -797,6 +795,6 @@ while robot.step(TIME_STEP) != -1:
     i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    if i == 500:			
+    if i == 200:			
         returnToStart()			
         break

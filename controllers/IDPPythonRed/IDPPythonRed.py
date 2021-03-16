@@ -146,7 +146,7 @@ def shuffle_back_short():
     i=0	
     while robot.step(TIME_STEP) != -1:	
       i += 1	
-      if i==90:	
+      if i==50:	
         motor_left.setVelocity(0)	
         motor_right.setVelocity(0)	
         break       
@@ -433,7 +433,8 @@ def alternateRoute(desiredxpos, desiredzpos):
             zdiff = desiredzpos - gps.getValues()[2]		
             distance = math.sqrt(xdiff**2 + zdiff**2)
             
-#Gets a bearing when given a position            
+#Gets a bearing when given a position
+#DO NOT CHANGE THE FUNCTION BASIC ARGUMENTS, 0.4 IS VERY IMPORTANT            
 def getBearingToPoint(x = 0, y = 0, z = 0.4):	
     initial_position = [x, y, z]			
     current_position = gps.getValues()			
@@ -452,7 +453,6 @@ def getBearingToPoint(x = 0, y = 0, z = 0.4):
         #print("condition 4")			
     #if current_position[2] == initial_position[2] and current_position[0] == initial_position[0]:			
         #print("condition 5")	
-        	
     return target_bearing
     
 #def getBearingUpwards(x,z):
@@ -535,9 +535,9 @@ while robot.step(TIME_STEP) != -1:
 
 #=========================FIRST HALF============================================
     if firstHalf == True:
-        current_position = gps.getValues()
-        bearing = getBearingUpwards(current_position[0],current_position[2])
-        rotateUntilBearing(bearing,getBearingInDegrees())
+        #current_position = gps.getValues()
+        #bearing = getBearingUpwards(current_position[0],current_position[2])
+        #rotateUntilBearing(bearing,getBearingInDegrees())
        
         #SCANNING FOR BLOCKS
         if scanblocks == False:			
@@ -597,7 +597,7 @@ while robot.step(TIME_STEP) != -1:
             
             #REMOVING BLOCKS WITH THE WRONG X COORDINATE 
             for i in range(len(GPSOfBlocks)):
-                if GPSOfBlocks[i][2] <= 0:
+                if GPSOfBlocks[i][0] <= 0:
                     indicesToRemoveForWrongHalf.append(i)
             
             for index in sorted(indicesToRemoveForWrongHalf, reverse=True):		
@@ -612,7 +612,7 @@ while robot.step(TIME_STEP) != -1:
             try:
                 checkgoround = checkStartCross(GPSOfBlocks[0][0], GPSOfBlocks[0][1])
             except IndexError:
-                sendFinished()
+                sendFinished(wrongBlocks)
                 firstHalf = False
                 break	
             
@@ -651,17 +651,19 @@ while robot.step(TIME_STEP) != -1:
                     
                     #If the lists are empty, consider first half completed            	
                     except IndexError:
-                        sendFinished()
+                        left_motor.setVelocity(0)
+                        right_motor.setVelocity(0)
+                        sendFinished(wrongBlocks)
                         firstHalf = False
                         break
                         
             #Rerouting code version to get to block        
-            if checkgoround == True and firstHalf = True:       	
+            if checkgoround == True and firstHalf == True:       	
                 try:
                     x,y = GPSOfBlocks[0][0], GPSOfBlocks[0][1]
                 except IndexError:
                     firstHalf = False
-                    sendFinished()
+                    sendFinished(wrongBlocks)
                     break	
                     
                 alternateRoute(x, y)	
@@ -686,12 +688,12 @@ while robot.step(TIME_STEP) != -1:
                 	        	
         #TAKING BLOCK TO START POINT     			
         if moveblock == False and blockred==True:	
-            altRoute = checkStartCross(0, -0.4, True)				
+            altRoute = checkStartCross(0, 0.4, True)				
             if altRoute == False:	
                 returnToStart()	
             else:	
                 bearings[0] = getBearingToPoint()	
-                alternateRoute(0, -0.4)			
+                alternateRoute(0, 0.4)			
             open_arms()			
             shuffle_back()			
             moveblock = True			
@@ -703,7 +705,7 @@ while robot.step(TIME_STEP) != -1:
     
     #If a robot is finished and has not yet got data from the robot, it will sit and 
     #attempt to receive data. This loop ends once all data is passed on.
-    while firstHalf == False and otherRobotFinished = False: 
+    while firstHalf == False and otherRobotFinished == False: 
         try: 
             rightBlocks[0] = receivingData()
             
@@ -731,8 +733,7 @@ while robot.step(TIME_STEP) != -1:
             rotateUntilBearing(bearings[i],getBearingInDegrees())		
                     
             #NOW GOING TO BLOCKS SENT BY RED	
-            try:
-                checkgoround = checkStartCross(rightBlocks[i][0], rightBlocks[i][1])
+            checkgoround = checkStartCross(rightBlocks[i][0], rightBlocks[i][1])
             	
             if checkgoround == False:	
                 rotateUntilBearing(bearings[i], getBearingInDegrees())			
@@ -777,12 +778,12 @@ while robot.step(TIME_STEP) != -1:
     	
             #TAKING BLOCK TO START POINT     			
             if moveblock == False and gotblock==True:	
-                altRoute = checkStartCross(0, -0.4, True)				
+                altRoute = checkStartCross(0, 0.4, True)				
                 if altRoute == False:	
                     returnToStart()	
                 else:	
                     bearings[0] = getBearingToPoint()	
-                    alternateRoute(0, -0.4)			
+                    alternateRoute(0, 0.4)			
                 open_arms()			
                 shuffle_back()			
                 moveblock = True			

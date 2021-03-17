@@ -805,7 +805,7 @@ while robot.step(TIME_STEP) != -1:
                 bearings[0] = getBearingToPoint()	
                 alternateRoute(0, -0.4)			
             open_arms()
-            print(getBearingInDegrees())
+            #print(getBearingInDegrees())
             if 265 < getBearingInDegrees() < 275:
                 shuffle_back_shortest()
             else:			
@@ -822,7 +822,7 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            print("GREEN REALISES OTHER ROBOT FINISHED")
+            #print("GREEN REALISES OTHER ROBOT FINISHED")
         else:
             j += 1
             if j == 100:
@@ -830,12 +830,12 @@ while robot.step(TIME_STEP) != -1:
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
         if cross == 0:
-            print("green heading across")
+            #print("green heading across")
             scanblocks = False
             gotblock = False
-            print("first half not done")
+            #print("first half not done")
             alternateRoute(0.8, -0.8, True)
-            print("first half done")
+            #print("first half done")
             alternateRoute(0.8, 0, True)
             motor_left.setVelocity(0)			
             motor_right.setVelocity(0)

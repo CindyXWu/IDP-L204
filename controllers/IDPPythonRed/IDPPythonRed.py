@@ -729,7 +729,7 @@ while robot.step(TIME_STEP) != -1:
                             wait()			
                             colour = getColour();	
                             if colour == False:			
-                                print("Green bot has located a red block")
+                                print("Red bot has located a green block")
                                 open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
@@ -737,7 +737,7 @@ while robot.step(TIME_STEP) != -1:
                                 break					
                             elif colour == True:					
                                 blockred=True			
-                                print("Green bot has located a green block")		
+                                print("Red bot has located a red block")		
                                 moveblock = False			
                                 gotblock = True			
                                 break
@@ -798,7 +798,7 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            print("RED REALISES OTHER ROBOT FINISHED")
+            #print("RED REALISES OTHER ROBOT FINISHED")
         else:
             j += 1
             if j == 100:
@@ -806,7 +806,7 @@ while robot.step(TIME_STEP) != -1:
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
         if cross == 0:
-            print("red heading across")
+            #print("red heading across")
             scanblocks = False
             gotblock = False
             alternateRoute(-0.8, 0.8, True)
@@ -936,7 +936,7 @@ while robot.step(TIME_STEP) != -1:
                             wait()			
                             colour = getColour();	
                             if colour == False:			
-                                print("Green bot has located a red block")
+                                print("Red bot has located a green block")
                                 open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
@@ -944,7 +944,7 @@ while robot.step(TIME_STEP) != -1:
                                 break					
                             elif colour == True:					
                                 blockred=True			
-                                print("Green bot has located a green block")		
+                                print("Red bot has located a red block")		
                                 moveblock = False			
                                 gotblock = True			
                                 break

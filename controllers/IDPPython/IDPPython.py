@@ -122,13 +122,13 @@ def close_arms():
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.27 * MAX_SPEED)			
-    motor_right.setVelocity(0.27 * MAX_SPEED)			
+    motor_left.setVelocity(-0.2 * MAX_SPEED)			
+    motor_right.setVelocity(0.2 * MAX_SPEED)			
 def rotate_CW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(0.27 * MAX_SPEED)			
-    motor_right.setVelocity(-0.27 * MAX_SPEED)			
+    motor_left.setVelocity(0.2 * MAX_SPEED)			
+    motor_right.setVelocity(-0.2 * MAX_SPEED)			
 def shuffle_back():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
@@ -261,7 +261,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_right.setVelocity(0)		
                 break	
             previousbearing = bearing
-    elif target_bearing > int(initial_bearing):	
+    if target_bearing > initial_bearing and target_bearing-initial_bearing <= 180:	
         rotate_CW()	
         while robot.step(TIME_STEP) != -1:     	
             bearing = getBearingInDegrees()	
@@ -269,7 +269,19 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0)	
                 break	
-    else:	
+    if target_bearing > initial_bearing and target_bearing-initial_bearing > 180:
+        rotate_ACW()
+        while robot.step(TIME_STEP) != -1:     	
+            bearing = getBearingInDegrees()
+            if bearing-initial_bearing > -0.1:
+                angle_rotated = initial_bearing + 360 - bearing
+            if bearing-initial_bearing <= 0.1:
+                angle_rotated = initial_bearing - bearing	
+            if angle_rotated >= 360 - target_bearing + initial_bearing:	
+                motor_left.setVelocity(0)	
+                motor_right.setVelocity(0)	
+                break
+    if target_bearing < initial_bearing and initial_bearing-target_bearing <= 180:	
         rotate_ACW()	
         while robot.step(TIME_STEP) != -1:	
             bearing = getBearingInDegrees()	
@@ -277,7 +289,19 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0) 	
                 break   
-                
+    if target_bearing < initial_bearing and initial_bearing-target_bearing > 180:
+        rotate_CW()    	
+        while robot.step(TIME_STEP) != -1:			
+            bearing = getBearingInDegrees()  					
+            if (bearing - initial_bearing) >= -0.1:    #If i'm not pointing at block, angle to rotated is different			
+                angle_rotated = bearing - initial_bearing			
+            else: 			
+                angle_rotated = bearing - initial_bearing + 360			
+            if angle_rotated >= 360-initial_bearing+target_bearing:                                            			
+                motor_left.setVelocity(0)			
+                motor_right.setVelocity(0)			
+                break
+                        
 #INITIAL SCANNING FUNCTION               			
 def doScan(theta, initial_bearing):
     close_arms()			

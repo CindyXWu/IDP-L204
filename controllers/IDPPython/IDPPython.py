@@ -1,7 +1,7 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter			
 import math			
 import struct			
-TIME_STEP = 8			
+TIME_STEP = 24			
 MAX_SPEED = 7.5			
 # create a robot			
 robot = Robot() 			
@@ -122,34 +122,34 @@ def close_arms():
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.28 * MAX_SPEED)			
-    motor_right.setVelocity(0.28 * MAX_SPEED)			
+    motor_left.setVelocity(-0.27 * MAX_SPEED)			
+    motor_right.setVelocity(0.27 * MAX_SPEED)			
 def rotate_CW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(0.28 * MAX_SPEED)			
-    motor_right.setVelocity(-0.28 * MAX_SPEED)			
+    motor_left.setVelocity(0.27 * MAX_SPEED)			
+    motor_right.setVelocity(-0.27 * MAX_SPEED)			
 def shuffle_back():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.8 * MAX_SPEED)			
-    motor_right.setVelocity(-0.8 * MAX_SPEED)					
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==250:			
+      if i==80:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break				
 def shuffle_back_short():		
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.8 * MAX_SPEED)			
-    motor_right.setVelocity(-0.8 * MAX_SPEED)					
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==180:			
+      if i==50:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break
@@ -158,8 +158,8 @@ def shuffle_back_shortest():
 #the red starting square in a very specific case		
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.8 * MAX_SPEED)			
-    motor_right.setVelocity(-0.8 * MAX_SPEED)					
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
@@ -169,7 +169,7 @@ def shuffle_back_shortest():
         break		
 def wait():
     wait = 0
-    while robot.step(TIME_STEP) != -1 and wait<60:
+    while robot.step(TIME_STEP) != -1 and wait<20:
         wait += 1 
 #============================READING SENSOR VALUES====================================        				
 def getColour():		
@@ -322,11 +322,11 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :			
         alpha = sensorValueScan[i][2];			
     #Conditions for blocks to be picked out: large jump from previous value		
-        if (sensorValueScan[i - 1][2] - alpha) > 0.105:			
+        if (sensorValueScan[i - 1][2] - alpha) > 0.12:			
             blockBearings.append(sensorValueScan[i][3])			
             blockDistances.append(alpha)	
-            print("BEARING: ", sensorValueScan[i][3])
-            print("DIFF: ", sensorValueScan[i - 1][2] - alpha)		
+            #print("BEARING: ", sensorValueScan[i][3])
+            #print("DIFF: ", sensorValueScan[i - 1][2] - alpha)		
     for i in range(len(blockBearings)):			
         xcoord = gps.getValues()[0] + (blockDistances[i] + 0.12) * math.cos(blockBearings[i] * math.pi / 180);			
         zcoord = gps.getValues()[2] + (blockDistances[i] + 0.12) * math.sin(blockBearings[i] * math.pi / 180);			
@@ -641,7 +641,7 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemove.append(i)	
             
             for i in range(len(GPSOfBlocks)):
-                if abs(GPSOfBlocks[i][0]) > 1.13 or abs(GPSOfBlocks[i][1]) > 1.13:
+                if abs(GPSOfBlocks[i][0]) > 1.1 or abs(GPSOfBlocks[i][1]) > 1.1:
                     indicesToRemove.append(i)
                         
             #It is very important that we delete the higher index first, so that 	
@@ -719,7 +719,7 @@ while robot.step(TIME_STEP) != -1:
                         
                         n+=1
                         
-                        if distance < 0.35:
+                        if distance < 0.4:
                             open_arms()
                         		
                         if distance < 0.1:			
@@ -742,7 +742,7 @@ while robot.step(TIME_STEP) != -1:
                                 gotblock = True			
                                 break
                                       
-                        if n == 2000:
+                        if n == 600:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -868,7 +868,7 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemove.append(i)	
             
             for i in range(len(GPSOfBlocks)):
-                if abs(GPSOfBlocks[i][0]) > 1.12 or abs(GPSOfBlocks[i][1]) > 1.12:
+                if abs(GPSOfBlocks[i][0]) > 1.15 or abs(GPSOfBlocks[i][1]) > 1.15:
                     indicesToRemove.append(i)
                      
             #It is very important that we delete the higher index first, so that 	
@@ -952,7 +952,7 @@ while robot.step(TIME_STEP) != -1:
                             moveblock = False				
                             break
                             
-                        if n == 2000:
+                        if n == 600:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -1123,7 +1123,7 @@ while robot.step(TIME_STEP) != -1:
                                 moveblock = False					
                                 break
                                 
-                            if n == 2000:
+                            if n == 600:
                                 motor_left.setVelocity(0)			
                                 motor_right.setVelocity(0)
                                 close_arms()
@@ -1179,7 +1179,7 @@ while robot.step(TIME_STEP) != -1:
     #i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    #if i == 5000:			
+    #if i == 600:			
         #returnToStart()
         #print("Exiting due to timeout")			
         #break

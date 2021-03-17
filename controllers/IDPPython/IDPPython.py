@@ -2,7 +2,7 @@ from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, 
 import math			
 import struct			
 TIME_STEP = 8			
-MAX_SPEED = 10			
+MAX_SPEED = 7.5			
 # create a robot			
 robot = Robot() 			
 # get devices			
@@ -325,8 +325,8 @@ def getBlockData():
         if (sensorValueScan[i - 1][2] - alpha) > 0.105:			
             blockBearings.append(sensorValueScan[i][3])			
             blockDistances.append(alpha)	
-            #print("BEARING: ", sensorValueScan[i][3])
-            #print("DIFF: ", sensorValueScan[i - 1][2] - alpha)		
+            print("BEARING: ", sensorValueScan[i][3])
+            print("DIFF: ", sensorValueScan[i - 1][2] - alpha)		
     for i in range(len(blockBearings)):			
         xcoord = gps.getValues()[0] + (blockDistances[i] + 0.12) * math.cos(blockBearings[i] * math.pi / 180);			
         zcoord = gps.getValues()[2] + (blockDistances[i] + 0.12) * math.sin(blockBearings[i] * math.pi / 180);			
@@ -742,7 +742,7 @@ while robot.step(TIME_STEP) != -1:
                                 gotblock = True			
                                 break
                                       
-                        if n == 500:
+                        if n == 2000:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -949,17 +949,17 @@ while robot.step(TIME_STEP) != -1:
                             motor_right.setVelocity(0)	
                             close_arms()				
                             blockgreen=True			
-                            moveblock = False					
+                            moveblock = False				
                             break
                             
-                        if n == 500:
+                        if n == 2000:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
                             wait()			
                             colour = getColour();	
                             if colour == False:			
-                                print("Green bot has located a red block")
+                                #print("Green bot has located a red block")
                                 open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
@@ -967,7 +967,7 @@ while robot.step(TIME_STEP) != -1:
                                 break					
                             elif colour == True:					
                                 blockgreen=True			
-                                print("Green bot has located a green block")		
+                                #print("Green bot has located a green block")		
                                 moveblock = False			
                                 gotblock = True			
                                 break
@@ -1123,14 +1123,14 @@ while robot.step(TIME_STEP) != -1:
                                 moveblock = False					
                                 break
                                 
-                            if n == 500:
+                            if n == 2000:
                                 motor_left.setVelocity(0)			
                                 motor_right.setVelocity(0)
                                 close_arms()
                                 wait()			
                                 colour = getColour();	
                                 if colour == False:			
-                                    print("Green bot has located a red block")
+                                    #print("Green bot has located a red block")
                                     open_arms()			
                                     shuffle_back_short()			
                                     scanblocks=False			
@@ -1138,7 +1138,7 @@ while robot.step(TIME_STEP) != -1:
                                     break					
                                 elif colour == True:					
                                     blockgreen=True			
-                                    print("Green bot has located a green block")		
+                                    #print("Green bot has located a green block")		
                                     moveblock = False			
                                     gotblock = True			
                                     break

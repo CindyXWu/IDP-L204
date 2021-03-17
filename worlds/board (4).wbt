@@ -1,6 +1,6 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
-  basicTimeStep 16
+  basicTimeStep 8
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
@@ -18,8 +18,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.9936666439157562 0.11193436847983276 0.00986397091536795 5.065898205969504
-  position -0.49880730908495785 4.719453820989113 1.7515933636309726
+  orientation -0.9950871318992578 -0.09775427295279901 0.01567488590002725 1.0607836253254812
+  position -0.3963217248495146 3.9111398878008745 2.278438113545136
 }
 Background {
   skyColor [
@@ -30,43 +30,6 @@ Floor {
   size 2.4 2.4
   appearance Asphalt {
   }
-}
-target {
-  translation -0.138552 0.05 0.00363538
-  name "target(9)"
-}
-target {
-  translation -0.907634 0.05 -0.841763
-  name "target(8)"
-}
-target {
-  translation -0.935354 0.05 0.72847
-  name "target(7)"
-}
-target {
-  translation -0.344548 0.05 0.255827
-  name "target(6)"
-}
-target {
-  translation 0.640034 0.05 0.73635
-  rotation 0 0 1 -0.261795307179586
-  colour 0 1 0
-  name "target(5)"
-}
-target {
-  translation -0.178611 0.05 -0.951137
-  colour 0 1 0
-  name "target(1)"
-}
-target {
-  translation 0.916674 0.05 -0.624203
-  colour 0 1 0
-  name "target(2)"
-}
-target {
-  translation 0.467549 0.05 -0.236532
-  colour 0 1 0
-  name "target(3)"
 }
 DEF Floor_colour Solid {
   translation 0 0.0001 0.4
@@ -138,22 +101,44 @@ DEF WALL_4 Solid {
   name "solid(3)"
   boundingObject USE WALL_SHAPE
 }
-Robot {
-  translation 0 0.06 0
-  rotation 1 0 0 1.5708
-  children [
-    LightSensor {
-      rotation 0 1 0 -1.57
-      lookupTable [
-        0 0 0
-        4 4 0
-      ]
-    }
-  ]
-  controller "my_controller"
-}
 TexturedBackgroundLight {
   texture "empty_office"
+}
+target {
+  translation 0.855054 0.03 -0.13225
+}
+target {
+  translation 0.986727 0.03 0.235613
+  name "target(4)"
+}
+target {
+  translation 0.536346 0.03 -0.468076
+  name "target(2)"
+}
+target {
+  translation -0.430591 0.03 -0.177103
+  rotation 0 1 0 4.692820414042842e-06
+  name "target(3)"
+}
+target {
+  translation -0.527892 0.03 -1.00525
+  colour 0 1 0
+  name "target(6)"
+}
+target {
+  translation -0.69234 0.03 -0.904691
+  colour 0 1 0
+  name "target(7)"
+}
+target {
+  translation -0.973846 0.03 -0.513157
+  colour 0 1 0
+  name "target(1)"
+}
+target {
+  translation 0.646297 0.03 0.897397
+  colour 0 1 0
+  name "target(5)"
 }
 robotmain {
 }

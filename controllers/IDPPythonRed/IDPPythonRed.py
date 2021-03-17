@@ -2,7 +2,7 @@ from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, 
 import math	
 import struct	
 TIME_STEP = 8	
-MAX_SPEED = 10	
+MAX_SPEED = 7.5	
 # create a robot	
 robot = Robot() 	
 # get devices	
@@ -722,7 +722,7 @@ while robot.step(TIME_STEP) != -1:
                                 gotblock = True			
                                 break
                                                                 
-                        if n == 500:
+                        if n == 2000:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -902,14 +902,14 @@ while robot.step(TIME_STEP) != -1:
                 #Check if you will need to go around. Try-except handles cases of empty GPS lists
                 #i.e. finished	
                 checkgoround = checkStartCross(GPSOfBlocks[j][0], GPSOfBlocks[j][1])
-                n = 1
                 
                 #If we don't need to reroute, run Cindy's orginal code as normal	
                 if checkgoround == False and firstHalf == False:
                     #print("normal route")
                     rotateUntilBearing(getBearingToPoint(GPSOfBlocks[j][0], 0, GPSOfBlocks[j][1]), getBearingInDegrees())		
                     move_forwards()			
-                    close_arms()  		
+                    close_arms() 
+                    n = 1 		
                     		
                     while robot.step(TIME_STEP) != -1:	       			
                         xdiff = GPSOfBlocks[j][0] - gps.getValues()[0]			
@@ -926,10 +926,10 @@ while robot.step(TIME_STEP) != -1:
                             motor_right.setVelocity(0)	
                             close_arms()				
                             blockred = True			
-                            moveblock = False					
+                            moveblock = False				
                             break
-                                                      
-                        if n == 500:
+                                    
+                        if n == 2000:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -1100,7 +1100,7 @@ while robot.step(TIME_STEP) != -1:
                                 moveblock = False					
                                 break
                                 
-                            if n == 500:
+                            if n == 2000:
                                 motor_left.setVelocity(0)			
                                 motor_right.setVelocity(0)
                                 close_arms()

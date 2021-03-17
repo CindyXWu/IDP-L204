@@ -123,8 +123,8 @@ def rotate_ACW():
 def rotate_CW():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	
-    motor_left.setVelocity(0.2 * MAX_SPEED)	
-    motor_right.setVelocity(-0.2 * MAX_SPEED)	
+    motor_left.setVelocity(0.3 * MAX_SPEED)	
+    motor_right.setVelocity(-0.3 * MAX_SPEED)	
 def shuffle_back():	
     motor_left.setPosition(float('inf'))	
     motor_right.setPosition(float('inf'))	

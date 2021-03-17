@@ -1,6 +1,6 @@
 #VRML_SIM R2021a utf8
 WorldInfo {
-  basicTimeStep 8
+  basicTimeStep 16
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
@@ -18,8 +18,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.9987254781168997 0.046090447220287434 -0.02056915251545584 4.7795335190390755
-  position -0.337064586111065 4.680893734773074 0.4061850465881112
+  orientation 0.9994279953936006 0.032987544488320565 -0.007450096117510723 4.98618370266577
+  position -0.3671719196252763 7.740032303507243 2.122220657814939
 }
 Background {
   skyColor [
@@ -30,6 +30,42 @@ Floor {
   size 2.4 2.4
   appearance Asphalt {
   }
+}
+target {
+  translation -0.5242 0.05 -0.144
+  name "target(9)"
+}
+target {
+  translation -1.0665 0.05 -0.2783
+  name "target(8)"
+}
+target {
+  translation -0.9467 0.05 0.624
+  name "target(7)"
+}
+target {
+  translation 0.7601 0.05 0.6937
+  name "target(6)"
+}
+target {
+  translation 0.4578 0.05 -0.7358
+  colour 0 1 0
+  name "target(5)"
+}
+target {
+  translation -0.4298 0.05 -0.0241
+  colour 0 1 0
+  name "target(1)"
+}
+target {
+  translation 1.058 0.05 -0.1279
+  colour 0 1 0
+  name "target(2)"
+}
+target {
+  translation -1.0941 0.05 0.3438
+  colour 0 1 0
+  name "target(3)"
 }
 DEF Floor_colour Solid {
   translation 0 0.0001 0.4
@@ -103,41 +139,6 @@ DEF WALL_4 Solid {
 }
 TexturedBackgroundLight {
   texture "empty_office"
-}
-target {
-  translation 0.47 0.03 0.51
-}
-target {
-  translation -0.475433 0.03 -0.0860822
-  name "target(4)"
-}
-target {
-  translation 0.536346 0.03 -0.768076
-  name "target(2)"
-}
-target {
-  translation -0.93 0.03 0.58
-  name "target(3)"
-}
-target {
-  translation 0.929502 0.03 0.457514
-  colour 0 1 0
-  name "target(6)"
-}
-target {
-  translation 0.508979 0.03 -0.322989
-  colour 0 1 0
-  name "target(7)"
-}
-target {
-  translation -0.774396 0.03 -0.75856
-  colour 0 1 0
-  name "target(1)"
-}
-target {
-  translation -0.22 0.03 0.8
-  colour 0 1 0
-  name "target(5)"
 }
 robotmain {
 }

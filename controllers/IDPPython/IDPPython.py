@@ -1,8 +1,8 @@
 from controller import Robot, Motor, DistanceSensor, LightSensor, GPS, Compass, Receiver, Emitter			
 import math			
 import struct			
-TIME_STEP = 8			
-MAX_SPEED = 10			
+TIME_STEP = 24			
+MAX_SPEED = 7.5			
 # create a robot			
 robot = Robot() 			
 # get devices			
@@ -122,40 +122,54 @@ def close_arms():
 def rotate_ACW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.28 * MAX_SPEED)			
-    motor_right.setVelocity(0.28 * MAX_SPEED)			
+    motor_left.setVelocity(-0.25 * MAX_SPEED)			
+    motor_right.setVelocity(0.25 * MAX_SPEED)			
 def rotate_CW():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(0.28 * MAX_SPEED)			
-    motor_right.setVelocity(-0.28 * MAX_SPEED)			
+    motor_left.setVelocity(0.25 * MAX_SPEED)			
+    motor_right.setVelocity(-0.25 * MAX_SPEED)			
 def shuffle_back():			
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.8 * MAX_SPEED)			
-    motor_right.setVelocity(-0.8 * MAX_SPEED)					
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==250:			
+      if i==100:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break				
 def shuffle_back_short():		
     motor_left.setPosition(float('inf'))			
     motor_right.setPosition(float('inf'))			
-    motor_left.setVelocity(-0.8 * MAX_SPEED)			
-    motor_right.setVelocity(-0.8 * MAX_SPEED)					
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
     i=0			
     while robot.step(TIME_STEP) != -1:			
       i += 1			
-      if i==180:			
+      if i==50:			
+        motor_left.setVelocity(0)			
+        motor_right.setVelocity(0)			
+        break
+def shuffle_back_shortest(): 
+#prevents the green robot from backing into
+#the red starting square in a very specific case		
+    motor_left.setPosition(float('inf'))			
+    motor_right.setPosition(float('inf'))			
+    motor_left.setVelocity(-MAX_SPEED)			
+    motor_right.setVelocity(-MAX_SPEED)					
+    i=0			
+    while robot.step(TIME_STEP) != -1:			
+      i += 1			
+      if i==120:			
         motor_left.setVelocity(0)			
         motor_right.setVelocity(0)			
         break		
 def wait():
     wait = 0
-    while robot.step(TIME_STEP) != -1 and wait<60:
+    while robot.step(TIME_STEP) != -1 and wait<20:
         wait += 1 
 #============================READING SENSOR VALUES====================================        				
 def getColour():		
@@ -247,7 +261,7 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_right.setVelocity(0)		
                 break	
             previousbearing = bearing
-    elif target_bearing > int(initial_bearing):	
+    if target_bearing > initial_bearing and target_bearing-initial_bearing <= 180:	
         rotate_CW()	
         while robot.step(TIME_STEP) != -1:     	
             bearing = getBearingInDegrees()	
@@ -255,7 +269,19 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0)	
                 break	
-    else:	
+    if target_bearing > initial_bearing and target_bearing-initial_bearing > 180:
+        rotate_ACW()
+        while robot.step(TIME_STEP) != -1:     	
+            bearing = getBearingInDegrees()
+            if bearing-initial_bearing > -0.1:
+                angle_rotated = initial_bearing + 360 - bearing
+            if bearing-initial_bearing <= 0.1:
+                angle_rotated = initial_bearing - bearing	
+            if angle_rotated >= 360 - target_bearing + initial_bearing:	
+                motor_left.setVelocity(0)	
+                motor_right.setVelocity(0)	
+                break
+    if target_bearing < initial_bearing and initial_bearing-target_bearing <= 180:	
         rotate_ACW()	
         while robot.step(TIME_STEP) != -1:	
             bearing = getBearingInDegrees()	
@@ -263,7 +289,19 @@ def rotateUntilBearing(target_bearing, initial_bearing):
                 motor_left.setVelocity(0)	
                 motor_right.setVelocity(0) 	
                 break   
-                
+    if target_bearing < initial_bearing and initial_bearing-target_bearing > 180:
+        rotate_CW()    	
+        while robot.step(TIME_STEP) != -1:			
+            bearing = getBearingInDegrees()  					
+            if (bearing - initial_bearing) >= -0.1:    #If i'm not pointing at block, angle to rotated is different			
+                angle_rotated = bearing - initial_bearing			
+            else: 			
+                angle_rotated = bearing - initial_bearing + 360			
+            if angle_rotated >= 360-initial_bearing+target_bearing:                                            			
+                motor_left.setVelocity(0)			
+                motor_right.setVelocity(0)			
+                break
+                        
 #INITIAL SCANNING FUNCTION               			
 def doScan(theta, initial_bearing):
     close_arms()			
@@ -308,7 +346,7 @@ def getBlockData():
     for i in range(1,len(sensorValueScan)) :			
         alpha = sensorValueScan[i][2];			
     #Conditions for blocks to be picked out: large jump from previous value		
-        if (sensorValueScan[i - 1][2] - alpha) > 0.105:			
+        if (sensorValueScan[i - 1][2] - alpha) > 0.12:			
             blockBearings.append(sensorValueScan[i][3])			
             blockDistances.append(alpha)	
             #print("BEARING: ", sensorValueScan[i][3])
@@ -627,7 +665,7 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemove.append(i)	
             
             for i in range(len(GPSOfBlocks)):
-                if abs(GPSOfBlocks[i][0]) > 1.13 or abs(GPSOfBlocks[i][1]) > 1.13:
+                if abs(GPSOfBlocks[i][0]) > 1.1 or abs(GPSOfBlocks[i][1]) > 1.1:
                     indicesToRemove.append(i)
                         
             #It is very important that we delete the higher index first, so that 	
@@ -635,9 +673,12 @@ while robot.step(TIME_STEP) != -1:
             #And you know that indicesToRemove has indices in ascending order	
             #So iterate through backwards	
             for index in sorted(indicesToRemove, reverse=True):		
-                GPSOfBlocks.pop(index)	
-                bearings.pop(index)	
-                distances.pop(index)		
+                try:	  	
+                    GPSOfBlocks.pop(index)	
+                    bearings.pop(index)	
+                    distances.pop(index)
+                except IndexError:
+                    pass		
                 
             #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
             if int(len(wrongBlocks)) > 0:	
@@ -656,9 +697,12 @@ while robot.step(TIME_STEP) != -1:
                                 
                 #Same logic as above; we must iterate backwards         	                       		
                 for index in sorted(indicesToRemove,reverse=True):	  	
-                    GPSOfBlocks.pop(index)	
-                    bearings.pop(index)	
-                    distances.pop(index)
+                    try:	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)
+                    except IndexError:
+                        pass
             
             #REMOVING BLOCKS WITH THE WRONG X COORDINATE 
             for i in range(len(GPSOfBlocks)):
@@ -666,9 +710,12 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemoveForWrongHalf.append(i)
             
             for index in sorted(indicesToRemoveForWrongHalf, reverse=True):		
-                GPSOfBlocks.pop(index)	
-                bearings.pop(index)	
-                distances.pop(index)
+                try:	  	
+                    GPSOfBlocks.pop(index)	
+                    bearings.pop(index)	
+                    distances.pop(index)
+                except IndexError:
+                    pass
                 
 #===========================NOW GOING TO ANY UNVISITED BLOCKS=============================
 
@@ -696,7 +743,7 @@ while robot.step(TIME_STEP) != -1:
                         
                         n+=1
                         
-                        if distance < 0.35:
+                        if distance < 0.4:
                             open_arms()
                         		
                         if distance < 0.1:			
@@ -719,7 +766,7 @@ while robot.step(TIME_STEP) != -1:
                                 gotblock = True			
                                 break
                                       
-                        if n == 500:
+                        if n == 600:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
@@ -781,8 +828,12 @@ while robot.step(TIME_STEP) != -1:
             else:	
                 bearings[0] = getBearingToPoint()	
                 alternateRoute(0, -0.4)			
-            open_arms()			
-            shuffle_back()			
+            open_arms()
+            #print(getBearingInDegrees())
+            if 265 < getBearingInDegrees() < 275:
+                shuffle_back_shortest()
+            else:			
+                shuffle_back()			
             moveblock = True			
             gotblock = False			
             scanblocks = False	
@@ -795,7 +846,7 @@ while robot.step(TIME_STEP) != -1:
     while firstHalf == False and otherRobotFinished == False:
         if receiver.getQueueLength() != 0:
             otherRobotFinished = True
-            print("GREEN REALISES OTHER ROBOT FINISHED")
+            #print("GREEN REALISES OTHER ROBOT FINISHED")
         else:
             j += 1
             if j == 100:
@@ -803,12 +854,12 @@ while robot.step(TIME_STEP) != -1:
     #Now going to collect and bring back all blocks in turn
     if firstHalf == False and otherRobotFinished == True:
         if cross == 0:
-            print("green heading across")
+            #print("green heading across")
             scanblocks = False
             gotblock = False
-            print("first half not done")
+            #print("first half not done")
             alternateRoute(0.8, -0.8, True)
-            print("first half done")
+            #print("first half done")
             alternateRoute(0.8, 0, True)
             motor_left.setVelocity(0)			
             motor_right.setVelocity(0)
@@ -841,7 +892,7 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemove.append(i)	
             
             for i in range(len(GPSOfBlocks)):
-                if abs(GPSOfBlocks[i][0]) > 1.12 or abs(GPSOfBlocks[i][1]) > 1.12:
+                if abs(GPSOfBlocks[i][0]) > 1.15 or abs(GPSOfBlocks[i][1]) > 1.15:
                     indicesToRemove.append(i)
                      
             #It is very important that we delete the higher index first, so that 	
@@ -849,9 +900,12 @@ while robot.step(TIME_STEP) != -1:
             #And you know that indicesToRemove has indices in ascending order	
             #So iterate through backwards	
             for index in sorted(indicesToRemove, reverse=True):		
-                GPSOfBlocks.pop(index)	
-                bearings.pop(index)	
-                distances.pop(index)		
+                try:	  	
+                    GPSOfBlocks.pop(index)	
+                    bearings.pop(index)	
+                    distances.pop(index)
+                except IndexError:
+                    pass		
                 
             #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
             if int(len(wrongBlocks)) > 0:	
@@ -870,9 +924,12 @@ while robot.step(TIME_STEP) != -1:
                                 
                 #Same logic as above; we must iterate backwards         	                       		
                 for index in sorted(indicesToRemove,reverse=True):	  	
-                    GPSOfBlocks.pop(index)	
-                    bearings.pop(index)	
-                    distances.pop(index)
+                    try:	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)
+                    except IndexError:
+                        pass
             
             #REMOVING BLOCKS WITH THE WRONG X COORDINATE 
             for i in range(len(GPSOfBlocks)):
@@ -880,9 +937,12 @@ while robot.step(TIME_STEP) != -1:
                     indicesToRemoveForWrongHalf.append(i)
             
             for index in sorted(indicesToRemoveForWrongHalf, reverse=True):		
-                GPSOfBlocks.pop(index)	
-                bearings.pop(index)	
-                distances.pop(index)
+                try:	  	
+                    GPSOfBlocks.pop(index)	
+                    bearings.pop(index)	
+                    distances.pop(index)
+                except IndexError:
+                    pass
                 
 #===========================NOW GOING TO ANY UNVISITED BLOCKS=============================
             for j in range(len(GPSOfBlocks)):
@@ -913,17 +973,17 @@ while robot.step(TIME_STEP) != -1:
                             motor_right.setVelocity(0)	
                             close_arms()				
                             blockgreen=True			
-                            moveblock = False					
+                            moveblock = False				
                             break
                             
-                        if n == 500:
+                        if n == 600:
                             motor_left.setVelocity(0)			
                             motor_right.setVelocity(0)
                             close_arms()
                             wait()			
                             colour = getColour();	
                             if colour == False:			
-                                print("Green bot has located a red block")
+                                #print("Green bot has located a red block")
                                 open_arms()			
                                 shuffle_back_short()			
                                 scanblocks=False			
@@ -931,7 +991,7 @@ while robot.step(TIME_STEP) != -1:
                                 break					
                             elif colour == True:					
                                 blockgreen=True			
-                                print("Green bot has located a green block")		
+                                #print("Green bot has located a green block")		
                                 moveblock = False			
                                 gotblock = True			
                                 break
@@ -969,6 +1029,173 @@ while robot.step(TIME_STEP) != -1:
         gotallblock = True
         
     if gotallblock ==True:
+        if firstHalf == False and otherRobotFinished == True:
+            scanblocks = False
+            gotblock = False
+            motor_left.setVelocity(0)			
+            motor_right.setVelocity(0)
+
+            #SOMETHING HERE TO SWITCH SIDES WITHOUT COLLIDING: TOM WILL PUT<<======================
+            
+            if scanblocks == False:			
+                current_bearing = getBearingInDegrees()			
+                sensorValueScan = doScan(355, current_bearing)				
+                scanblocks = True
+            
+            #GETTING BLOCK DATA		
+            if scanblocks==True and gotblock == False:	
+        
+                #if nextTargetIdentified == True:
+                	#nextTargetIdentified = False
+                	#GPSOfBlocks = receivedCoordinate
+                	#bearings = getBearingToPoint(GPSOfBlocks[0],0, GPSOfBlocks[1])
+                    
+                #if nextTargetIdentified == False:	
+                GPSOfBlocks, bearings, distances = getBlockData()	
+                indicesToRemove = []	
+                indicesToRemoveForWrongHalf = []	
+    
+    #=====================CLEANING BLOCK DATA============================================
+           	
+                #REMOVING BLOCKS THAT ARE ALREADY IN THE RIGHT PLACE	
+                for i in range(len(GPSOfBlocks)):	
+                    if abs(GPSOfBlocks[i][0]) < 0.2 and 0.2 < abs(GPSOfBlocks[i][1]) < 0.6:		
+                        indicesToRemove.append(i)	
+                
+                for i in range(len(GPSOfBlocks)):
+                    if abs(GPSOfBlocks[i][0]) > 1.12 or abs(GPSOfBlocks[i][1]) > 1.12:
+                        indicesToRemove.append(i)
+                         
+                #It is very important that we delete the higher index first, so that 	
+                #by deleting indices one by one, we are not affecting remaining deletions	
+                #And you know that indicesToRemove has indices in ascending order	
+                #So iterate through backwards	
+                for index in sorted(indicesToRemove, reverse=True):		
+                    try:	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)
+                    except IndexError:
+                        pass	
+                    
+                #REMOVING BLOCKS THAT HAVE ALREADY BEEN VISITED		
+                if int(len(wrongBlocks)) > 0:	
+                    indicesToRemove = []		
+                                
+                    for i in range(len(GPSOfBlocks)):			
+                        for j in range(len(wrongBlocks)):				
+                            #looking at the difference between GPS locations of wrong coloured blocks and blocks from scanning again			
+                            xdelta = wrongBlocks[j][0]-GPSOfBlocks[i][0]			
+                            zdelta = wrongBlocks[j][1]-GPSOfBlocks[i][1]				
+                            distanceBetweenReadings = math.sqrt(xdelta**2 + zdelta**2)			
+                                    
+                            if distanceBetweenReadings < 0.15:			
+                                #This means the same block is being read again. Delete it from the front of the list			
+                                indicesToRemove.append(i)	
+                                    
+                    #Same logic as above; we must iterate backwards         	                       		
+                    for index in sorted(indicesToRemove,reverse=True):	  	
+                        try:	  	
+                            GPSOfBlocks.pop(index)	
+                            bearings.pop(index)	
+                            distances.pop(index)
+                        except IndexError:
+                            pass
+                
+                #REMOVING BLOCKS WITH THE WRONG X COORDINATE 
+                for i in range(len(GPSOfBlocks)):
+                    if GPSOfBlocks[i][0] < 0:
+                        indicesToRemoveForWrongHalf.append(i)
+                
+                for index in sorted(indicesToRemoveForWrongHalf, reverse=True):		
+                    try:	  	
+                        GPSOfBlocks.pop(index)	
+                        bearings.pop(index)	
+                        distances.pop(index)
+                    except IndexError:
+                        pass
+                    
+    #===========================NOW GOING TO ANY UNVISITED BLOCKS=============================
+                for j in range(len(GPSOfBlocks)):
+                    #Check if you will need to go around. Try-except handles cases of empty GPS lists
+                    #i.e. finished	
+                    checkgoround = checkStartCross(GPSOfBlocks[j][0], GPSOfBlocks[j][1])
+                    
+                    #If we don't need to reroute, run Cindy's orginal code as normal	
+                    if checkgoround == False and firstHalf == False:
+                        #print("normal route")	
+                        rotateUntilBearing(getBearingToPoint(GPSOfBlocks[j][0], 0, GPSOfBlocks[j][1]), getBearingInDegrees())		
+                        move_forwards()			
+                        close_arms()
+                        n = 1   		
+                        		
+                        while robot.step(TIME_STEP) != -1:	       			
+                            xdiff = GPSOfBlocks[j][0] - gps.getValues()[0]			
+                            zdiff = GPSOfBlocks[j][1] - gps.getValues()[2]			
+                            distance = math.sqrt(xdiff**2 + zdiff**2)	
+                            
+                            n += 1
+                            
+                            if distance < 0.35:
+                                open_arms_wide()	
+    	
+                            if distance < 0.1:			
+                                motor_left.setVelocity(0)			
+                                motor_right.setVelocity(0)	
+                                close_arms()				
+                                blockgreen=True			
+                                moveblock = False					
+                                break
+                                
+                            if n == 600:
+                                motor_left.setVelocity(0)			
+                                motor_right.setVelocity(0)
+                                close_arms()
+                                wait()			
+                                colour = getColour();	
+                                if colour == False:			
+                                    #print("Green bot has located a red block")
+                                    open_arms()			
+                                    shuffle_back_short()			
+                                    scanblocks=False			
+                                    wrongBlocks.append(GPSOfBlocks[0])			
+                                    break					
+                                elif colour == True:					
+                                    blockgreen=True			
+                                    #print("Green bot has located a green block")		
+                                    moveblock = False			
+                                    gotblock = True			
+                                    break
+                                
+                    #Rerouting code version to get to block        
+                    if checkgoround == True and firstHalf == False:
+                        #print("altroute")       	
+                        x,y = GPSOfBlocks[j][0], GPSOfBlocks[j][1]	
+                            
+                        alternateRoute(x, y)	
+                        motor_left.setVelocity(0)			
+                        motor_right.setVelocity(0)
+                        close_arms()					
+                        blockgreen=True
+                        moveblock = False						
+                            		
+        #=======================TAKING BLOCK BACK TO START=============================           
+                        	        	
+                    #TAKING BLOCK TO START POINT     			
+                    if moveblock == False and blockgreen==True:	
+                        altRoute = checkStartCross(0, -0.4, True)				
+                        if altRoute == False:	
+                            returnToStart()	
+                        else:	
+                            bearings[0] = getBearingToPoint()	
+                            alternateRoute(0, -0.4)
+                        motor_left.setVelocity(0)			
+                        motor_right.setVelocity(0)			
+                        open_arms()			
+                        shuffle_back()			
+                        moveblock = True
+                        gotblock = False			
+                        scanblocks = False
         returnToStart()
         print("Green finished")
         break
@@ -976,7 +1203,7 @@ while robot.step(TIME_STEP) != -1:
     #i += 1				
     
     #Break condition to prevent infinite loops for whatever reason		
-    #if i == 5000:			
+    #if i == 600:			
         #returnToStart()
         #print("Exiting due to timeout")			
         #break

@@ -5,6 +5,6 @@ sceneTreePerspectives: 000000ff0000000100000002000001ca000000fa01000000020100000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 0 "controllers/IDPPythonRed/IDPPythonRed.py" "controllers/IDPPython/IDPPython.py"
+textFiles: 1 "controllers/IDPPythonRed/IDPPythonRed.py" "controllers/IDPPython/IDPPython.py"
 globalOptionalRendering: CoordinateSystem
 consoles: Console:All:All
